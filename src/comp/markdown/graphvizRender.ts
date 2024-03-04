@@ -15,16 +15,17 @@ export const graphvizRender = (element: HTMLElement, cdn = Constants.CDN) => {
 		return;
 	}
 	addScript(`${cdn}/dist/js/graphviz/viz.js`, 'vditorGraphVizScript').then(() => {
+		//@ts-ignore
 		graphvizElements.forEach((e: HTMLDivElement) => {
 			const code = graphvizRenderAdapter.getCode(e);
 			if (
-				e.parentElement.classList.contains('vditor-wysiwyg__pre') ||
-				e.parentElement.classList.contains('vditor-ir__marker--pre')
+				e.parentElement?.classList.contains('vditor-wysiwyg__pre') ||
+				e.parentElement?.classList.contains('vditor-ir__marker--pre')
 			) {
 				return;
 			}
 
-			if (e.getAttribute('data-processed') === 'true' || code.trim() === '') {
+			if (e.getAttribute('data-processed') === 'true' || code?.trim() === '') {
 				return;
 			}
 
@@ -41,7 +42,7 @@ export const graphvizRender = (element: HTMLElement, cdn = Constants.CDN) => {
 				const blobUrl = url.createObjectURL(blob);
 				const worker = new Worker(blobUrl);
 				new Viz({ worker })
-					.renderSVGElement(code)
+					.renderSVGElement(code!)
 					.then((result: HTMLElement) => {
 						e.innerHTML = result.outerHTML;
 					})

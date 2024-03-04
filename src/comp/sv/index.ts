@@ -1,4 +1,5 @@
 import { isCtrl, isFirefox } from '$util/compatibility';
+import { IEditor } from '$type/index';
 import {
 	blurEvent,
 	copyEvent,
@@ -25,7 +26,7 @@ class Editor {
 	constructor(vditor: IEditor) {
 		this.element = document.createElement('pre');
 		this.element.className = 'vditor-sv vditor-reset';
-		this.element.setAttribute('placeholder', vditor.options.placeholder);
+		this.element.setAttribute('placeholder', vditor.options.placeholder!);
 		this.element.setAttribute('contenteditable', 'true');
 		this.element.setAttribute('spellcheck', 'false');
 
@@ -43,10 +44,11 @@ class Editor {
 	private copy(event: ClipboardEvent, vditor: IEditor) {
 		event.stopPropagation();
 		event.preventDefault();
-		event.clipboardData.setData('text/plain', getSelectText(vditor[vditor.currentMode].element));
+		event.clipboardData?.setData('text/plain', getSelectText(vditor[vditor.currentMode]!.element)!);
 	}
 
 	private bindEvent(vditor: IEditor) {
+		//@ts-ignore
 		this.element.addEventListener('paste', (event: ClipboardEvent & { target: HTMLElement }) => {
 			paste(vditor, event, {
 				pasteCode: (code: string) => {
@@ -56,13 +58,13 @@ class Editor {
 		});
 
 		this.element.addEventListener('scroll', () => {
-			if (vditor.preview.element.style.display !== 'block') {
+			if (vditor.preview?.element.style.display !== 'block') {
 				return;
 			}
 			const textScrollTop = this.element.scrollTop;
 			const textHeight = this.element.clientHeight;
 			const textScrollHeight = this.element.scrollHeight - parseFloat(this.element.style.paddingBottom || '0');
-			const preview = vditor.preview.element;
+			const preview = vditor.preview!.element;
 			if (textScrollTop / textHeight > 0.5) {
 				preview.scrollTop =
 					((textScrollTop + textHeight) * preview.scrollHeight) / textScrollHeight - textHeight;
@@ -70,18 +72,18 @@ class Editor {
 				preview.scrollTop = (textScrollTop * preview.scrollHeight) / textScrollHeight;
 			}
 		});
-
+		//@ts-ignore
 		this.element.addEventListener('compositionstart', (event: InputEvent) => {
 			this.composingLock = true;
 		});
-
+		//@ts-ignore
 		this.element.addEventListener('compositionend', (event: InputEvent) => {
 			if (!isFirefox()) {
 				inputEvent(vditor, event);
 			}
 			this.composingLock = false;
 		});
-
+		//@ts-ignore
 		this.element.addEventListener('input', (event: InputEvent) => {
 			if (event.inputType === 'deleteByDrag' || event.inputType === 'insertFromDrop') {
 				// https://github.com/Vanessa219/vditor/issues/801 编辑器内容拖拽问题
@@ -108,15 +110,15 @@ class Editor {
 			}
 			if (
 				(event.key === 'Backspace' || event.key === 'Delete') &&
-				vditor.sv.element.innerHTML !== '' &&
-				vditor.sv.element.childNodes.length === 1 &&
-				vditor.sv.element.firstElementChild &&
-				vditor.sv.element.firstElementChild.tagName === 'DIV' &&
-				vditor.sv.element.firstElementChild.childElementCount === 2 &&
-				(vditor.sv.element.firstElementChild.textContent === '' || vditor.sv.element.textContent === '\n')
+				vditor.sv?.element.innerHTML !== '' &&
+				vditor.sv?.element.childNodes.length === 1 &&
+				vditor.sv?.element.firstElementChild &&
+				vditor.sv?.element.firstElementChild.tagName === 'DIV' &&
+				vditor.sv?.element.firstElementChild.childElementCount === 2 &&
+				(vditor.sv?.element.firstElementChild.textContent === '' || vditor.sv?.element.textContent === '\n')
 			) {
 				// 为空时显示 placeholder
-				vditor.sv.element.innerHTML = '';
+				vditor.sv!.element.innerHTML = '';
 				return;
 			}
 			if (event.key === 'Enter') {

@@ -20,6 +20,7 @@ import { highlightToolbarIR } from './highlightToolbarIR';
 import { input } from './input';
 import { processAfterRender, processHint } from './process';
 import { hidePanel } from '../toolbar/setToolbar';
+import { IEditor } from '$type/editor';
 
 class IR {
 	public range?: Range;
@@ -51,7 +52,7 @@ class IR {
 	}
 
 	private copy(event: ClipboardEvent, vditor: IEditor) {
-		const range = getSelection().getRangeAt(0);
+		const range = getSelection()!.getRangeAt(0);
 		if (range.toString() === '') {
 			return;
 		}
@@ -61,11 +62,12 @@ class IR {
 		const tempElement = document.createElement('div');
 		tempElement.appendChild(range.cloneContents());
 
-		event.clipboardData.setData('text/plain', vditor.lute.VditorIRDOM2Md(tempElement.innerHTML).trim());
-		event.clipboardData.setData('text/html', '');
+		event.clipboardData?.setData('text/plain', vditor.lute.VditorIRDOM2Md(tempElement.innerHTML).trim());
+		event.clipboardData?.setData('text/html', '');
 	}
 
 	private bindEvent(vditor: IEditor) {
+		//@ts-ignore
 		this.element.addEventListener('paste', (event: ClipboardEvent & { target: HTMLElement }) => {
 			paste(vditor, event, {
 				pasteCode: (code: string) => {
@@ -77,18 +79,18 @@ class IR {
 		this.element.addEventListener('scroll', () => {
 			hidePanel(vditor, ['hint']);
 		});
-
+		//@ts-ignore
 		this.element.addEventListener('compositionstart', (event: InputEvent) => {
 			this.composingLock = true;
 		});
-
+		//@ts-ignore
 		this.element.addEventListener('compositionend', (event: InputEvent) => {
 			if (!isFirefox()) {
-				input(vditor, getSelection().getRangeAt(0).cloneRange());
+				input(vditor, getSelection()!.getRangeAt(0).cloneRange());
 			}
 			this.composingLock = false;
 		});
-
+		//@ts-ignore
 		this.element.addEventListener('input', (event: InputEvent) => {
 			if (event.inputType === 'deleteByDrag' || event.inputType === 'insertFromDrop') {
 				// https://github.com/Vanessa219/vditor/issues/801 编辑器内容拖拽问题
@@ -106,9 +108,9 @@ class IR {
 			if (this.composingLock || event.data === '‘' || event.data === '“' || event.data === '《') {
 				return;
 			}
-			input(vditor, getSelection().getRangeAt(0).cloneRange(), false, event);
+			input(vditor, getSelection()!.getRangeAt(0).cloneRange(), false, event);
 		});
-
+		//@ts-ignore
 		this.element.addEventListener('click', (event: MouseEvent & { target: HTMLInputElement }) => {
 			if (event.target.tagName === 'INPUT') {
 				if (event.target.checked) {
@@ -129,11 +131,11 @@ class IR {
 				previewElement = hasClosestByClassName(range.startContainer, 'vditor-ir__preview');
 			}
 			if (previewElement) {
-				if (previewElement.previousElementSibling.firstElementChild) {
-					range.selectNodeContents(previewElement.previousElementSibling.firstElementChild);
+				if (previewElement.previousElementSibling?.firstElementChild) {
+					range.selectNodeContents(previewElement.previousElementSibling!.firstElementChild);
 				} else {
 					// 行内数学公式
-					range.selectNodeContents(previewElement.previousElementSibling);
+					range.selectNodeContents(previewElement.previousElementSibling!);
 				}
 				range.collapse(true);
 				setSelectionFocus(range);
@@ -143,7 +145,7 @@ class IR {
 			// 点击图片光标选中图片地址
 			if (event.target.tagName === 'IMG') {
 				const linkElement =
-					event.target.parentElement.querySelector<HTMLSpanElement>('.vditor-ir__marker--link');
+					event.target.parentElement?.querySelector<HTMLSpanElement>('.vditor-ir__marker--link');
 				if (linkElement) {
 					range.selectNode(linkElement);
 					setSelectionFocus(range);
@@ -152,10 +154,10 @@ class IR {
 			// 打开链接
 			const aElement = hasClosestByAttribute(event.target, 'data-type', 'a');
 			if (aElement && !aElement.classList.contains('vditor-ir__node--expand')) {
-				if (vditor.options.link.click) {
-					vditor.options.link.click(aElement.querySelector(':scope > .vditor-ir__marker--link'));
-				} else if (vditor.options.link.isOpen) {
-					window.open(aElement.querySelector(':scope > .vditor-ir__marker--link').textContent);
+				if (vditor.options.link!.click) {
+					vditor.options.link?.click(aElement.querySelector(':scope > .vditor-ir__marker--link')!);
+				} else if (vditor.options.link?.isOpen) {
+					window.open(aElement.querySelector(':scope > .vditor-ir__marker--link')?.textContent!);
 				}
 				return;
 			}
@@ -165,7 +167,7 @@ class IR {
 				if (event.y > lastRect.top + lastRect.height) {
 					if (
 						this.element.lastElementChild.tagName === 'P' &&
-						this.element.lastElementChild.textContent.trim().replace(Constants.ZWSP, '') === ''
+						this.element.lastElementChild.textContent?.trim().replace(Constants.ZWSP, '') === ''
 					) {
 						range.selectNodeContents(this.element.lastElementChild);
 						range.collapse(false);
@@ -198,12 +200,12 @@ class IR {
 			highlightToolbarIR(vditor);
 			if (
 				(event.key === 'Backspace' || event.key === 'Delete') &&
-				vditor.ir.element.innerHTML !== '' &&
-				vditor.ir.element.childNodes.length === 1 &&
-				vditor.ir.element.firstElementChild &&
-				vditor.ir.element.firstElementChild.tagName === 'P' &&
-				vditor.ir.element.firstElementChild.childElementCount === 0 &&
-				(vditor.ir.element.textContent === '' || vditor.ir.element.textContent === '\n')
+				vditor.ir?.element.innerHTML !== '' &&
+				vditor.ir?.element.childNodes.length === 1 &&
+				vditor.ir?.element.firstElementChild &&
+				vditor.ir?.element.firstElementChild.tagName === 'P' &&
+				vditor.ir?.element.firstElementChild.childElementCount === 0 &&
+				(vditor.ir?.element.textContent === '' || vditor.ir?.element.textContent === '\n')
 			) {
 				// 为空时显示 placeholder
 				vditor.ir.element.innerHTML = '';
@@ -237,11 +239,11 @@ class IR {
 
 			if (previewRenderElement) {
 				if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
-					if (previewRenderElement.previousElementSibling.firstElementChild) {
-						range.selectNodeContents(previewRenderElement.previousElementSibling.firstElementChild);
+					if (previewRenderElement.previousElementSibling?.firstElementChild) {
+						range.selectNodeContents(previewRenderElement.previousElementSibling!.firstElementChild);
 					} else {
 						// 行内数学公式/html entity
-						range.selectNodeContents(previewRenderElement.previousElementSibling);
+						range.selectNodeContents(previewRenderElement.previousElementSibling!);
 					}
 					range.collapse(false);
 					event.preventDefault();
@@ -251,12 +253,12 @@ class IR {
 					previewRenderElement.tagName === 'SPAN' &&
 					(event.key === 'ArrowDown' || event.key === 'ArrowRight')
 				) {
-					if (previewRenderElement.parentElement.getAttribute('data-type') === 'html-entity') {
+					if (previewRenderElement.parentElement!.getAttribute('data-type') === 'html-entity') {
 						// html entity
-						previewRenderElement.parentElement.insertAdjacentText('afterend', Constants.ZWSP);
-						range.setStart(previewRenderElement.parentElement.nextSibling, 1);
+						previewRenderElement.parentElement!.insertAdjacentText('afterend', Constants.ZWSP);
+						range.setStart(previewRenderElement.parentElement?.nextSibling!, 1);
 					} else {
-						range.selectNodeContents(previewRenderElement.parentElement.lastElementChild);
+						range.selectNodeContents(previewRenderElement.parentElement?.lastElementChild!);
 					}
 					range.collapse(false);
 					event.preventDefault();

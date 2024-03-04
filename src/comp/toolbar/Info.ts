@@ -1,6 +1,8 @@
 import { VDITOR_VERSION } from '$const';
 import { getEventName } from '$util/compatibility';
 import { MenuItem } from './MenuItem';
+import { IMenuItem } from '$type/toolbar';
+import { IEditor } from '$type/index';
 
 export class Info extends MenuItem {
 	constructor(vditor: IEditor, menuItem: IMenuItem) {

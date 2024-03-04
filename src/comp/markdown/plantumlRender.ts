@@ -12,14 +12,15 @@ export const plantumlRender = (element: HTMLElement | Document = document, cdn =
 		return;
 	}
 	addScript(`${cdn}/dist/js/plantuml/plantuml-encoder.min.js`, 'vditorPlantumlScript').then(() => {
+		//@ts-ignore
 		plantumlElements.forEach((e: HTMLDivElement) => {
 			if (
-				e.parentElement.classList.contains('vditor-wysiwyg__pre') ||
-				e.parentElement.classList.contains('vditor-ir__marker--pre')
+				e.parentElement?.classList.contains('vditor-wysiwyg__pre') ||
+				e.parentElement?.classList.contains('vditor-ir__marker--pre')
 			) {
 				return;
 			}
-			const text = plantumlRenderAdapter.getCode(e).trim();
+			const text = plantumlRenderAdapter.getCode(e)?.trim();
 			if (!text) {
 				return;
 			}

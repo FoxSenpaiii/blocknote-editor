@@ -1,6 +1,7 @@
 import { Constants } from '$const';
 import { hidePanel } from '../toolbar/setToolbar';
 import { isCtrl } from '$util/compatibility';
+import { IEditor } from '$type/index';
 import {
 	fixBlockquote,
 	fixCJKPosition,
@@ -29,7 +30,7 @@ import { expandMarker } from './expandMarker';
 import { processAfterRender, processHeading } from './process';
 
 export const processKeydown = (vditor: IEditor, event: KeyboardEvent) => {
-	vditor.ir.composingLock = event.isComposing;
+	vditor.ir!.composingLock = event.isComposing;
 	if (event.isComposing) {
 		return false;
 	}
@@ -45,7 +46,7 @@ export const processKeydown = (vditor: IEditor, event: KeyboardEvent) => {
 		event.key !== 'Escape' &&
 		!/^F\d{1,2}$/.test(event.key)
 	) {
-		vditor.undo.recordFirstPosition(vditor, event);
+		vditor.undo?.recordFirstPosition(vditor, event);
 	}
 
 	const range = getEditorRange(vditor);
@@ -80,31 +81,31 @@ export const processKeydown = (vditor: IEditor, event: KeyboardEvent) => {
 		!event.shiftKey &&
 		event.key === 'Enter' &&
 		newlineElement &&
-		range.startOffset < newlineElement.textContent.length
+		range.startOffset < newlineElement.textContent!.length
 	) {
 		const beforeMarkerElement = newlineElement.previousElementSibling;
 		if (beforeMarkerElement) {
-			range.insertNode(document.createTextNode(beforeMarkerElement.textContent));
+			range.insertNode(document.createTextNode(beforeMarkerElement.textContent!));
 			range.collapse(false);
 		}
 		const afterMarkerElement = newlineElement.nextSibling;
 		if (afterMarkerElement) {
-			range.insertNode(document.createTextNode(afterMarkerElement.textContent));
+			range.insertNode(document.createTextNode(afterMarkerElement.textContent!));
 			range.collapse(true);
 		}
 	}
 
 	const pElement = hasClosestByMatchTag(startContainer, 'P');
 	// md 处理
-	if (fixMarkdown(event, vditor, pElement, range)) {
+	if (fixMarkdown(event, vditor, pElement!, range)) {
 		return true;
 	}
 	// li
-	if (fixList(range, vditor, pElement, event)) {
+	if (fixList(range, vditor, pElement!, event)) {
 		return true;
 	}
 	// blockquote
-	if (fixBlockquote(vditor, range, event, pElement)) {
+	if (fixBlockquote(vditor, range, event, pElement!)) {
 		return true;
 	}
 	// 代码块
@@ -118,13 +119,13 @@ export const processKeydown = (vditor: IEditor, event: KeyboardEvent) => {
 		if (
 			(codeRenderElement.getAttribute('data-type') === 'math-block' ||
 				codeRenderElement.getAttribute('data-type') === 'html-block') &&
-			insertBeforeBlock(vditor, event, range, codeRenderElement, preRenderElement.parentElement)
+			insertBeforeBlock(vditor, event, range, codeRenderElement, preRenderElement.parentElement!)
 		) {
 			return true;
 		}
 
 		// 代码块下无元素或者为代码块/table 元素，添加空块
-		if (insertAfterBlock(vditor, event, range, codeRenderElement, preRenderElement.parentElement)) {
+		if (insertAfterBlock(vditor, event, range, codeRenderElement, preRenderElement.parentElement!)) {
 			return true;
 		}
 	}
@@ -132,7 +133,7 @@ export const processKeydown = (vditor: IEditor, event: KeyboardEvent) => {
 	const preBeforeElement = hasClosestByAttribute(startContainer, 'data-type', 'code-block-info');
 	if (preBeforeElement) {
 		if (event.key === 'Enter' || event.key === 'Tab') {
-			range.selectNodeContents(preBeforeElement.nextElementSibling.firstChild);
+			range.selectNodeContents(preBeforeElement.nextElementSibling?.firstChild!);
 			range.collapse(true);
 			event.preventDefault();
 			hidePanel(vditor, ['hint']);
@@ -140,7 +141,7 @@ export const processKeydown = (vditor: IEditor, event: KeyboardEvent) => {
 		}
 
 		if (event.key === 'Backspace') {
-			const start = getSelectPosition(preBeforeElement, vditor.ir.element).start;
+			const start = getSelectPosition(preBeforeElement, vditor.ir!.element).start;
 			if (start === 1) {
 				// 删除零宽空格
 				range.setStart(startContainer, 0);
@@ -150,7 +151,7 @@ export const processKeydown = (vditor: IEditor, event: KeyboardEvent) => {
 				vditor.hint.recentLanguage = '';
 			}
 		}
-		if (insertBeforeBlock(vditor, event, range, preBeforeElement, preBeforeElement.parentElement)) {
+		if (insertBeforeBlock(vditor, event, range, preBeforeElement, preBeforeElement.parentElement!)) {
 			// 上无元素，按上或左将添加新块
 			hidePanel(vditor, ['hint']);
 			return true;
@@ -189,8 +190,8 @@ export const processKeydown = (vditor: IEditor, event: KeyboardEvent) => {
 		// enter++: 标题变大
 		if (matchHotKey('⌘=', event)) {
 			const headingMarkerElement = headingElement.querySelector('.vditor-ir__marker--heading');
-			if (headingMarkerElement && headingMarkerElement.textContent.trim().length > 1) {
-				processHeading(vditor, headingMarkerElement.textContent.substr(1));
+			if (headingMarkerElement && headingMarkerElement.textContent!.trim().length > 1) {
+				processHeading(vditor, headingMarkerElement.textContent!.substr(1));
 			}
 			event.preventDefault();
 			return true;
@@ -199,8 +200,8 @@ export const processKeydown = (vditor: IEditor, event: KeyboardEvent) => {
 		// enter++: 标题变小
 		if (matchHotKey('⌘-', event)) {
 			const headingMarkerElement = headingElement.querySelector('.vditor-ir__marker--heading');
-			if (headingMarkerElement && headingMarkerElement.textContent.trim().length < 6) {
-				processHeading(vditor, headingMarkerElement.textContent.trim() + '# ');
+			if (headingMarkerElement && headingMarkerElement.textContent!.trim().length < 6) {
+				processHeading(vditor, headingMarkerElement.textContent?.trim() + '# ');
 			}
 			event.preventDefault();
 			return true;
@@ -208,7 +209,7 @@ export const processKeydown = (vditor: IEditor, event: KeyboardEvent) => {
 	}
 	const blockElement = hasClosestBlock(startContainer);
 	if (event.key === 'Backspace' && !isCtrl(event) && !event.shiftKey && !event.altKey && range.toString() === '') {
-		if (fixDelete(vditor, range, event, pElement)) {
+		if (fixDelete(vditor, range, event, pElement!)) {
 			return true;
 		}
 
@@ -220,15 +221,15 @@ export const processKeydown = (vditor: IEditor, event: KeyboardEvent) => {
 			(blockElement.previousElementSibling.getAttribute('data-type') === 'code-block' ||
 				blockElement.previousElementSibling.getAttribute('data-type') === 'math-block')
 		) {
-			const rangeStart = getSelectPosition(blockElement, vditor.ir.element, range).start;
+			const rangeStart = getSelectPosition(blockElement, vditor.ir!.element, range).start;
 			if (rangeStart === 0 || (rangeStart === 1 && blockElement.innerText.startsWith(Constants.ZWSP))) {
 				// 当前块删除后光标落于代码渲染块上，当前块会被删除，因此需要阻止事件，不能和 keyup 中的代码块处理合并
 				range.selectNodeContents(
-					blockElement.previousElementSibling.querySelector('.vditor-ir__marker--pre code')
+					blockElement.previousElementSibling.querySelector('.vditor-ir__marker--pre code')!
 				);
 				range.collapse(false);
 				expandMarker(range, vditor);
-				if (blockElement.textContent.trim().replace(Constants.ZWSP, '') === '') {
+				if (blockElement.textContent?.trim().replace(Constants.ZWSP, '') === '') {
 					// 当前块为空且不是最后一个时，需要删除
 					blockElement.remove();
 					processAfterRender(vditor);
@@ -241,7 +242,7 @@ export const processKeydown = (vditor: IEditor, event: KeyboardEvent) => {
 		// 光标位于标题前，marker 后
 		if (headingElement) {
 			const headingLength = headingElement.firstElementChild?.textContent?.length;
-			if (getSelectPosition(headingElement, vditor.ir.element).start === headingLength) {
+			if (getSelectPosition(headingElement, vditor.ir!.element).start === headingLength) {
 				range.setStart(headingElement.firstElementChild?.firstChild!, headingLength - 1);
 				range.collapse(true);
 				setSelectionFocus(range);
@@ -251,6 +252,7 @@ export const processKeydown = (vditor: IEditor, event: KeyboardEvent) => {
 
 	if ((event.key === 'ArrowUp' || event.key === 'ArrowDown') && blockElement) {
 		// https://github.com/Vanessa219/vditor/issues/358
+		//@ts-ignore
 		blockElement.querySelectorAll('.vditor-ir__node').forEach((item: HTMLElement) => {
 			if (!item.contains(startContainer)) {
 				item.classList.add('vditor-ir__node--hidden');

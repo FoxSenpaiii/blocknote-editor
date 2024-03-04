@@ -41,7 +41,7 @@ class Vditor extends VditorMethod {
 	public vditor: IEditor;
 
 	/**
-	 * @param id 要挂载 Vditor 的元素或者元素 ID。
+	 * @param id 要挂载 Vditor 的元素或者元素 ID
 	 * @param options Vditor 参数
 	 */
 	constructor(id: string | HTMLElement, options?: IEditorOptions) {
@@ -49,28 +49,28 @@ class Vditor extends VditorMethod {
 		this.version = VDITOR_VERSION;
 
 		if (typeof id === 'string') {
-			if (!options) {
+			if (options) {
 				options = {
 					cache: {
 						id: `vditor${id}`
 					}
 				};
-			} else if (!options.cache) {
-				options.cache = { id: `vditor${id}` };
-			} else if (!options.cache.id) {
-				options.cache.id = `vditor${id}`;
+			} else if (options!.cache) {
+				options!.cache = { id: `vditor${id}` };
+			} else if (options!.cache!.id) {
+				options!.cache!.id = `vditor${id}`;
 			}
 			id = document.getElementById(id);
 		}
 
-		const getOptions = new Options(options);
+		const getOptions = new Options(options!);
 		const mergedOptions = getOptions.merge();
 
 		// 支持自定义国际化
 		if (!mergedOptions.i18n) {
 			if (
 				!['en_US', 'fr_FR', 'pt_BR', 'ja_JP', 'ko_KR', 'ru_RU', 'sv_SE', 'zh_CN', 'zh_TW'].includes(
-					mergedOptions.lang
+					mergedOptions.lang!
 				)
 			) {
 				throw new Error('options.lang error, see https://ld246.com/article/1549638745630#options');
@@ -106,11 +106,11 @@ class Vditor extends VditorMethod {
 		this.vditor.options.theme = theme;
 		setTheme(this.vditor);
 		if (contentTheme) {
-			this.vditor.options.preview.theme.current = contentTheme;
-			setContentTheme(contentTheme, contentThemePath || this.vditor.options.preview.theme.path);
+			this.vditor.options.preview!.theme!.current = contentTheme;
+			setContentTheme(contentTheme, contentThemePath || this.vditor.options.preview?.theme?.path!);
 		}
 		if (codeTheme) {
-			this.vditor.options.preview.hljs.style = codeTheme;
+			this.vditor.options.preview!.hljs!.style = codeTheme;
 			setCodeTheme(codeTheme, this.vditor.options.cdn);
 		}
 	}
@@ -128,22 +128,22 @@ class Vditor extends VditorMethod {
 	/** 聚焦到编辑器 */
 	public focus() {
 		if (this.vditor.currentMode === 'sv') {
-			this.vditor.sv.element.focus();
+			this.vditor.sv?.element.focus();
 		} else if (this.vditor.currentMode === 'wysiwyg') {
-			this.vditor.wysiwyg.element.focus();
+			this.vditor.wysiwyg?.element.focus();
 		} else if (this.vditor.currentMode === 'ir') {
-			this.vditor.ir.element.focus();
+			this.vditor.ir?.element.focus();
 		}
 	}
 
 	/** 让编辑器失焦 */
 	public blur() {
 		if (this.vditor.currentMode === 'sv') {
-			this.vditor.sv.element.blur();
+			this.vditor.sv?.element.blur();
 		} else if (this.vditor.currentMode === 'wysiwyg') {
-			this.vditor.wysiwyg.element.blur();
+			this.vditor.wysiwyg?.element.blur();
 		} else if (this.vditor.currentMode === 'ir') {
-			this.vditor.ir.element.blur();
+			this.vditor.ir?.element.blur();
 		}
 	}
 
@@ -151,31 +151,32 @@ class Vditor extends VditorMethod {
 	public disabled() {
 		hidePanel(this.vditor, ['subToolbar', 'hint', 'popover']);
 		disableToolbar(
-			this.vditor.toolbar.elements,
+			this.vditor.toolbar?.elements!,
 			Constants.EDIT_TOOLBARS.concat(['undo', 'redo', 'fullscreen', 'edit-mode'])
 		);
-		this.vditor[this.vditor.currentMode].element.setAttribute('contenteditable', 'false');
+		this.vditor[this.vditor.currentMode]?.element.setAttribute('contenteditable', 'false');
 	}
 
 	/** 解除编辑器禁用 */
 	public enable() {
 		enableToolbar(
-			this.vditor.toolbar.elements,
+			this.vditor.toolbar?.elements!,
 			Constants.EDIT_TOOLBARS.concat(['undo', 'redo', 'fullscreen', 'edit-mode'])
 		);
-		this.vditor.undo.resetIcon(this.vditor);
-		this.vditor[this.vditor.currentMode].element.setAttribute('contenteditable', 'true');
+		this.vditor.undo?.resetIcon(this.vditor);
+		this.vditor[this.vditor.currentMode]?.element.setAttribute('contenteditable', 'true');
 	}
+
 	downloadTip;
 
 	/** 返回选中的字符串 */
 	public getSelection() {
 		if (this.vditor.currentMode === 'wysiwyg') {
-			return getSelectText(this.vditor.wysiwyg.element);
+			return getSelectText(this.vditor.wysiwyg!.element);
 		} else if (this.vditor.currentMode === 'sv') {
-			return getSelectText(this.vditor.sv.element);
+			return getSelectText(this.vditor.sv!.element);
 		} else if (this.vditor.currentMode === 'ir') {
-			return getSelectText(this.vditor.ir.element);
+			return getSelectText(this.vditor.ir!.element);
 		}
 	}
 
@@ -186,30 +187,30 @@ class Vditor extends VditorMethod {
 
 	/** 获取焦点位置 */
 	public getCursorPosition() {
-		return getCursorPosition(this.vditor[this.vditor.currentMode].element);
+		return getCursorPosition(this.vditor[this.vditor.currentMode]!.element);
 	}
 
 	/** 上传是否还在进行中 */
 	public isUploading() {
-		return this.vditor.upload.isUploading;
+		return this.vditor.upload?.isUploading;
 	}
 
 	/** 清除缓存 */
 	public clearCache() {
-		localStorage.removeItem(this.vditor.options.cache.id);
+		localStorage.removeItem(this.vditor.options.cache?.id!);
 	}
 
 	/** 禁用缓存 */
 	public disabledCache() {
-		this.vditor.options.cache.enable = false;
+		this.vditor.options.cache!.enable = false;
 	}
 
 	/** 启用缓存 */
 	public enableCache() {
-		if (!this.vditor.options.cache.id) {
+		if (!this.vditor.options.cache?.id) {
 			throw new Error('need options.cache.id, see https://ld246.com/article/1549638745630#options');
 		}
-		this.vditor.options.cache.enable = true;
+		this.vditor.options.cache!.enable = true;
 	}
 
 	/** HTML 转 md */
@@ -239,7 +240,7 @@ class Vditor extends VditorMethod {
 
 	/** 删除选中内容 */
 	public deleteValue() {
-		if (window.getSelection().isCollapsed) {
+		if (window.getSelection()?.isCollapsed) {
 			return;
 		}
 		document.execCommand('delete', false);
@@ -259,19 +260,19 @@ class Vditor extends VditorMethod {
 		range.insertNode(tmpElement.content.cloneNode(true));
 		range.collapse(false);
 		if (this.vditor.currentMode === 'sv') {
-			this.vditor.sv.preventInput = true;
+			this.vditor.sv!.preventInput = true;
 			if (render) {
 				inputEvent(this.vditor);
 			}
 		} else if (this.vditor.currentMode === 'wysiwyg') {
 			// 由于 https://github.com/Vanessa219/vditor/issues/1566 不能使用 this.vditor.wysiwyg.preventInput = true;
 			if (render) {
-				input(this.vditor, getSelection().getRangeAt(0));
+				input(this.vditor, getSelection()!.getRangeAt(0));
 			}
 		} else if (this.vditor.currentMode === 'ir') {
-			this.vditor.ir.preventInput = true;
+			this.vditor.ir!.preventInput = true;
 			if (render) {
-				irInput(this.vditor, getSelection().getRangeAt(0), true);
+				irInput(this.vditor, getSelection()!.getRangeAt(0), true);
 			}
 		}
 	}
@@ -279,7 +280,7 @@ class Vditor extends VditorMethod {
 	/** 设置编辑器内容 */
 	public setValue(markdown: string, clearStack = false) {
 		if (this.vditor.currentMode === 'sv') {
-			this.vditor.sv.element.innerHTML = `<div data-block='0'>${this.vditor.lute.SpinVditorSVDOM(
+			this.vditor.sv!.element.innerHTML = `<div data-block='0'>${this.vditor.lute.SpinVditorSVDOM(
 				markdown
 			)}</div>`;
 			processSVAfterRender(this.vditor, {
@@ -294,9 +295,10 @@ class Vditor extends VditorMethod {
 				enableInput: false
 			});
 		} else {
-			this.vditor.ir.element.innerHTML = this.vditor.lute.Md2VditorIRDOM(markdown);
-			this.vditor.ir.element
+			this.vditor.ir!.element.innerHTML = this.vditor.lute.Md2VditorIRDOM(markdown);
+			this.vditor.ir?.element
 				.querySelectorAll(".vditor-ir__preview[data-render='2']")
+				//@ts-ignore
 				.forEach((item: HTMLElement) => {
 					processCodeRender(item, this.vditor);
 				});
@@ -311,8 +313,8 @@ class Vditor extends VditorMethod {
 
 		if (!markdown) {
 			hidePanel(this.vditor, ['emoji', 'headings', 'submenu', 'hint']);
-			if (this.vditor.wysiwyg.popover) {
-				this.vditor.wysiwyg.popover.style.display = 'none';
+			if (this.vditor.wysiwyg?.popover) {
+				this.vditor.wysiwyg!.popover.style.display = 'none';
 			}
 			this.clearCache();
 		}
@@ -323,8 +325,8 @@ class Vditor extends VditorMethod {
 
 	/** 清空 undo & redo 栈 */
 	public clearStack() {
-		this.vditor.undo.clearStack(this.vditor);
-		this.vditor.undo.addToUndoStack(this.vditor);
+		this.vditor.undo?.clearStack(this.vditor);
+		this.vditor.undo?.addToUndoStack(this.vditor);
 	}
 
 	/** 销毁编辑器 */
@@ -339,7 +341,7 @@ class Vditor extends VditorMethod {
 		this.clearCache();
 
 		UIUnbindListener();
-		this.vditor.wysiwyg.unbindListener();
+		this.vditor.wysiwyg?.unbindListener();
 	}
 
 	/** 获取评论 ID */
@@ -347,7 +349,7 @@ class Vditor extends VditorMethod {
 		if (this.vditor.currentMode !== 'wysiwyg') {
 			return [];
 		}
-		return this.vditor.wysiwyg.getComments(this.vditor, true);
+		return this.vditor.wysiwyg?.getComments(this.vditor, true);
 	}
 
 	/** 高亮评论 */
@@ -358,16 +360,16 @@ class Vditor extends VditorMethod {
 		const hlItem = (item: Element) => {
 			item.classList.remove('vditor-comment--hover');
 			ids.forEach((id) => {
-				if (item.getAttribute('data-cmtids').indexOf(id) > -1) {
+				if (item.getAttribute('data-cmtids')!.indexOf(id) > -1) {
 					item.classList.add('vditor-comment--hover');
 				}
 			});
 		};
-		this.vditor.wysiwyg.element.querySelectorAll('.vditor-comment').forEach((item) => {
+		this.vditor.wysiwyg?.element.querySelectorAll('.vditor-comment').forEach((item) => {
 			hlItem(item);
 		});
-		if (this.vditor.preview.element.style.display !== 'none') {
-			this.vditor.preview.element.querySelectorAll('.vditor-comment').forEach((item) => {
+		if (this.vditor.preview?.element.style.display !== 'none') {
+			this.vditor.preview?.element.querySelectorAll('.vditor-comment').forEach((item) => {
 				hlItem(item);
 			});
 		}
@@ -380,16 +382,16 @@ class Vditor extends VditorMethod {
 		}
 		const unHlItem = (item: Element) => {
 			ids.forEach((id) => {
-				if (item.getAttribute('data-cmtids').indexOf(id) > -1) {
+				if (item.getAttribute('data-cmtids')!.indexOf(id) > -1) {
 					item.classList.remove('vditor-comment--hover');
 				}
 			});
 		};
-		this.vditor.wysiwyg.element.querySelectorAll('.vditor-comment').forEach((item) => {
+		this.vditor.wysiwyg?.element.querySelectorAll('.vditor-comment').forEach((item) => {
 			unHlItem(item);
 		});
-		if (this.vditor.preview.element.style.display !== 'none') {
-			this.vditor.preview.element.querySelectorAll('.vditor-comment').forEach((item) => {
+		if (this.vditor.preview?.element.style.display !== 'none') {
+			this.vditor.preview?.element.querySelectorAll('.vditor-comment').forEach((item) => {
 				unHlItem(item);
 			});
 		}
@@ -402,7 +404,7 @@ class Vditor extends VditorMethod {
 		}
 
 		const removeItem = (item: Element, removeId: string) => {
-			const ids = item.getAttribute('data-cmtids').split(' ');
+			const ids = item.getAttribute('data-cmtids')!.split(' ');
 			ids.find((id, index) => {
 				if (id === removeId) {
 					ids.splice(index, 1);
@@ -417,11 +419,11 @@ class Vditor extends VditorMethod {
 			}
 		};
 		removeIds.forEach((removeId) => {
-			this.vditor.wysiwyg.element.querySelectorAll('.vditor-comment').forEach((item) => {
+			this.vditor.wysiwyg?.element.querySelectorAll('.vditor-comment').forEach((item) => {
 				removeItem(item, removeId);
 			});
-			if (this.vditor.preview.element.style.display !== 'none') {
-				this.vditor.preview.element.querySelectorAll('.vditor-comment').forEach((item) => {
+			if (this.vditor.preview?.element.style.display !== 'none') {
+				this.vditor.preview?.element.querySelectorAll('.vditor-comment').forEach((item) => {
 					removeItem(item, removeId);
 				});
 			}
@@ -437,52 +439,54 @@ class Vditor extends VditorMethod {
 		this.vditor = {
 			currentMode: mergedOptions.mode,
 			element: id,
-			hint: new Hint(mergedOptions.hint.extend),
-			lute: undefined,
+			hint: new Hint(mergedOptions.hint?.extend!),
+			lute: undefined!,
 			options: mergedOptions,
 			originalInnerHTML: id.innerHTML,
 			outline: new Outline(window.VditorI18n.outline),
 			tip: new Tip()
 		};
-
+		//@ts-ignore
 		this.vditor.sv = new Editor(this.vditor);
 		this.vditor.undo = new Undo();
+		//@ts-ignore
 		this.vditor.wysiwyg = new WYSIWYG(this.vditor);
+		//@ts-ignore
 		this.vditor.ir = new IR(this.vditor);
 		this.vditor.toolbar = new Toolbar(this.vditor);
 
-		if (mergedOptions.resize.enable) {
+		if (mergedOptions.resize?.enable) {
 			this.vditor.resize = new Resize(this.vditor);
 		}
 
-		if (this.vditor.toolbar.elements.devtools) {
+		if (this.vditor.toolbar.elements?.devtools) {
 			this.vditor.devtools = new DevTools();
 		}
 
-		if (mergedOptions.upload.url || mergedOptions.upload.handler) {
+		if (mergedOptions.upload?.url || mergedOptions.upload?.handler) {
 			this.vditor.upload = new Upload();
 		}
 
 		addScript(mergedOptions._lutePath || `${mergedOptions.cdn}/dist/js/lute/lute.min.js`, 'vditorLuteScript').then(
 			() => {
 				this.vditor.lute = setLute({
-					autoSpace: this.vditor.options.preview.markdown.autoSpace,
-					gfmAutoLink: this.vditor.options.preview.markdown.gfmAutoLink,
-					codeBlockPreview: this.vditor.options.preview.markdown.codeBlockPreview,
-					emojiSite: this.vditor.options.hint.emojiPath,
-					emojis: this.vditor.options.hint.emoji,
-					fixTermTypo: this.vditor.options.preview.markdown.fixTermTypo,
-					footnotes: this.vditor.options.preview.markdown.footnotes,
+					autoSpace: this.vditor.options.preview?.markdown?.autoSpace,
+					gfmAutoLink: this.vditor.options.preview?.markdown?.gfmAutoLink,
+					codeBlockPreview: this.vditor.options.preview?.markdown?.codeBlockPreview,
+					emojiSite: this.vditor.options.hint?.emojiPath!,
+					emojis: this.vditor.options.hint?.emoji!,
+					fixTermTypo: this.vditor.options.preview?.markdown?.fixTermTypo,
+					footnotes: this.vditor.options.preview?.markdown?.footnotes,
 					headingAnchor: false,
-					inlineMathDigit: this.vditor.options.preview.math.inlineDigit,
-					linkBase: this.vditor.options.preview.markdown.linkBase,
-					linkPrefix: this.vditor.options.preview.markdown.linkPrefix,
-					listStyle: this.vditor.options.preview.markdown.listStyle,
-					mark: this.vditor.options.preview.markdown.mark,
-					mathBlockPreview: this.vditor.options.preview.markdown.mathBlockPreview,
-					paragraphBeginningSpace: this.vditor.options.preview.markdown.paragraphBeginningSpace,
-					sanitize: this.vditor.options.preview.markdown.sanitize,
-					toc: this.vditor.options.preview.markdown.toc
+					inlineMathDigit: this.vditor.options.preview?.math?.inlineDigit!,
+					linkBase: this.vditor.options.preview?.markdown?.linkBase,
+					linkPrefix: this.vditor.options.preview?.markdown?.linkPrefix,
+					listStyle: this.vditor.options.preview?.markdown?.listStyle,
+					mark: this.vditor.options.preview?.markdown?.mark,
+					mathBlockPreview: this.vditor.options.preview?.markdown?.mathBlockPreview,
+					paragraphBeginningSpace: this.vditor.options.preview?.markdown?.paragraphBeginningSpace,
+					sanitize: this.vditor.options.preview!.markdown?.sanitize,
+					toc: this.vditor.options.preview?.markdown?.toc
 				});
 
 				this.vditor.preview = new Preview(this.vditor);

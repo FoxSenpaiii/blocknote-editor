@@ -7,7 +7,7 @@ declare global {
 export const lazyLoadImageRender = (element: HTMLElement | Document = document) => {
 	const loadImg = (it: HTMLImageElement) => {
 		const testImage = document.createElement('img');
-		testImage.src = it.getAttribute('data-src');
+		testImage.src = it.getAttribute('data-src')!;
 		testImage.addEventListener('load', () => {
 			if (
 				!it.getAttribute('style') &&
@@ -18,7 +18,7 @@ export const lazyLoadImageRender = (element: HTMLElement | Document = document) 
 				if (
 					testImage.naturalHeight > testImage.naturalWidth &&
 					testImage.naturalWidth / testImage.naturalHeight <
-						document.querySelector('.vditor-reset').clientWidth / (window.innerHeight - 40) &&
+						document.querySelector('.vditor-reset')!.clientWidth / (window.innerHeight - 40) &&
 					testImage.naturalHeight > window.innerHeight - 40
 				) {
 					it.style.height = window.innerHeight - 40 + 'px';
@@ -46,6 +46,7 @@ export const lazyLoadImageRender = (element: HTMLElement | Document = document) 
 		});
 	} else {
 		window.vditorImageIntersectionObserver = new IntersectionObserver((entries) => {
+			//@ts-ignore
 			entries.forEach((entrie: IntersectionObserverEntry & { target: HTMLImageElement }) => {
 				if (
 					(typeof entrie.isIntersecting === 'undefined'

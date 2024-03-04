@@ -2,18 +2,21 @@ import { exportHTML, exportMarkdown, exportPDF } from '../export';
 import { getEventName } from '$util/compatibility';
 import { MenuItem } from './MenuItem';
 import { hidePanel, toggleSubMenu } from './setToolbar';
+import { IEditor } from '$type/index';
+import { IMenuItem } from '$type/index';
 
 export class Export extends MenuItem {
 	public element: HTMLElement;
 
 	constructor(vditor: IEditor, menuItem: IMenuItem) {
 		super(vditor, menuItem);
-		const actionBtn = this.element.children[0] as HTMLElement;
+		const actionBtn = this!.element.children[0] as HTMLElement;
 		const panelElement = document.createElement('div');
 		panelElement.className = `vditor-hint${menuItem.level === 2 ? '' : ' vditor-panel--arrow'}`;
 		panelElement.innerHTML = `<button data-type="markdown">Markdown</button>
 <button data-type="pdf">PDF</button>
 <button data-type="html">HTML</button>`;
+		//@ts-ignore
 		panelElement.addEventListener(getEventName(), (event: MouseEvent & { target: HTMLElement }) => {
 			const btnElement = event.target;
 			if (btnElement.tagName === 'BUTTON') {
@@ -35,7 +38,7 @@ export class Export extends MenuItem {
 				event.stopPropagation();
 			}
 		});
-		this.element.appendChild(panelElement);
-		toggleSubMenu(vditor, panelElement, actionBtn, menuItem.level);
+		this!.element.appendChild(panelElement);
+		toggleSubMenu(vditor, panelElement, actionBtn, menuItem.level!);
 	}
 }

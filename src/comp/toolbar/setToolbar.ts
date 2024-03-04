@@ -1,5 +1,6 @@
 import { Constants } from '$const';
 import { getEventName } from '$util/compatibility';
+import { IEditor } from '$type/index';
 
 export const removeCurrentToolbar = (toolbar: { [key: string]: HTMLElement }, names: string[]) => {
 	names.forEach((name) => {
@@ -74,21 +75,22 @@ export const showToolbar = (toolbar: { [key: string]: HTMLElement }, names: stri
 // "subToolbar", "hint", "popover"
 export const hidePanel = (vditor: IEditor, panels: string[], exceptElement?: HTMLElement) => {
 	if (panels.includes('subToolbar')) {
+		//@ts-ignore
 		vditor.toolbar.element.querySelectorAll('.vditor-hint').forEach((item: HTMLElement) => {
 			if (exceptElement && item.isEqualNode(exceptElement)) {
 				return;
 			}
 			item.style.display = 'none';
 		});
-		if (vditor.toolbar.elements.emoji) {
-			(vditor.toolbar.elements.emoji.lastElementChild as HTMLElement).style.display = 'none';
+		if (vditor.toolbar?.elements?.emoji) {
+			(vditor.toolbar?.elements?.emoji.lastElementChild as HTMLElement).style.display = 'none';
 		}
 	}
 	if (panels.includes('hint')) {
 		vditor.hint.element.style.display = 'none';
 	}
-	if (vditor.wysiwyg.popover && panels.includes('popover')) {
-		vditor.wysiwyg.popover.style.display = 'none';
+	if (vditor.wysiwyg?.popover && panels.includes('popover')) {
+		vditor.wysiwyg!.popover.style.display = 'none';
 	}
 };
 
@@ -99,18 +101,22 @@ export const toggleSubMenu = (vditor: IEditor, panelElement: HTMLElement, action
 		if (actionBtn.classList.contains(Constants.CLASS_MENU_DISABLED)) {
 			return;
 		}
+		//@ts-ignore
 		vditor.toolbar.element.querySelectorAll('.vditor-hint--current').forEach((item) => {
 			item.classList.remove('vditor-hint--current');
 		});
 		if (panelElement.style.display === 'block') {
 			panelElement.style.display = 'none';
 		} else {
-			hidePanel(vditor, ['subToolbar', 'hint', 'popover'], actionBtn.parentElement.parentElement);
+			hidePanel(vditor, ['subToolbar', 'hint', 'popover'], actionBtn.parentElement?.parentElement!);
 			if (!actionBtn.classList.contains('vditor-tooltipped')) {
 				actionBtn.classList.add('vditor-hint--current');
 			}
 			panelElement.style.display = 'block';
-			if (vditor.toolbar.element.getBoundingClientRect().right - actionBtn.getBoundingClientRect().right < 250) {
+			if (
+				vditor.toolbar!.element!.getBoundingClientRect().right - actionBtn.getBoundingClientRect().right <
+				250
+			) {
 				panelElement.classList.add('vditor-panel--left');
 			} else {
 				panelElement.classList.remove('vditor-panel--left');

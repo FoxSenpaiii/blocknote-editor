@@ -83,5 +83,5 @@ export const exportHTML = (vditor: IEditor) => {
     Vditor.speechRender(previewElement);
 </script>
 <script src="${vditor.options.cdn}/dist/js/icons/${vditor.options.icon}.js"></script></body></html>`;
-	download(vditor, html, content.substr(0, 10) + '.html');
+	download(vditor, html, content!.substr(0, 10) + '.html');
 };

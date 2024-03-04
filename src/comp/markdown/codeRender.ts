@@ -1,12 +1,13 @@
 import { code160to32 } from '$util/code160to32';
 import { Constants } from '$const';
+import { IHljs } from '$type/hljs';
 
 export const codeRender = (element: HTMLElement, option?: IHljs) => {
 	Array.from<HTMLElement>(element.querySelectorAll('pre > code'))
 		.filter((e, index) => {
 			if (
-				e.parentElement.classList.contains('vditor-wysiwyg__pre') ||
-				e.parentElement.classList.contains('vditor-ir__marker--pre')
+				e.parentElement?.classList.contains('vditor-wysiwyg__pre') ||
+				e.parentElement?.classList.contains('vditor-ir__marker--pre')
 			) {
 				return false;
 			}
@@ -38,6 +39,7 @@ export const codeRender = (element: HTMLElement, option?: IHljs) => {
 			let codeText = e.innerText;
 			if (e.classList.contains('highlight-chroma')) {
 				const codeElement = e.cloneNode(true) as HTMLElement;
+				//@ts-ignore
 				codeElement.querySelectorAll('.highlight-ln').forEach((item: HTMLElement) => {
 					item.remove();
 				});
@@ -53,11 +55,11 @@ export const codeRender = (element: HTMLElement, option?: IHljs) => {
 
 			const divElement = document.createElement('div');
 			divElement.className = 'vditor-copy';
-			divElement.innerHTML = `<span aria-label="${window.VditorI18n?.copy || '复制'}"
-onmouseover="this.setAttribute('aria-label', '${window.VditorI18n?.copy || '复制'}')"
+			divElement.innerHTML = `<span aria-label="${window.VditorI18n.copy || '复制'}"
+onmouseover="this.setAttribute('aria-label', '${window.VditorI18n.copy || '复制'}')"
 class="vditor-tooltipped vditor-tooltipped__w"
 onclick="this.previousElementSibling.select();document.execCommand('copy');this.setAttribute('aria-label', '${
-				window.VditorI18n?.copied || '已复制'
+				window.VditorI18n.copied || '已复制'
 			}')">${iconHTML}</span>`;
 			const textarea = document.createElement('textarea');
 			textarea.value = code160to32(codeText);

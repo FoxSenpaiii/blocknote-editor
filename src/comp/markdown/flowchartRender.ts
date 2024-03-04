@@ -12,11 +12,12 @@ export const flowchartRender = (element: HTMLElement, cdn = Constants.CDN) => {
 		return;
 	}
 	addScript(`${cdn}/dist/js/flowchart.js/flowchart.min.js`, 'vditorFlowchartScript').then(() => {
+		//@ts-ignore
 		flowchartElements.forEach((item: HTMLElement) => {
 			if (item.getAttribute('data-processed') === 'true') {
 				return;
 			}
-			const flowchartObj = flowchart.parse(flowchartRenderAdapter.getCode(item));
+			const flowchartObj = flowchart.parse(flowchartRenderAdapter.getCode(item)!);
 			item.innerHTML = '';
 			flowchartObj.drawSVG(item);
 			item.setAttribute('data-processed', 'true');

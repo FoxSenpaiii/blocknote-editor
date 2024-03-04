@@ -4,6 +4,8 @@ import { processToolbar as processToolbarSV } from '../sv/process';
 import { getEventName } from '$util/compatibility';
 import { updateHotkeyTip } from '$util/compatibility';
 import { toolbarEvent } from '../wysiwyg/toolbarEvent';
+import { IMenuItem } from '$type/toolbar';
+import { IEditor } from '$type/index';
 
 export class MenuItem {
 	public element: HTMLElement;
@@ -28,7 +30,7 @@ export class MenuItem {
 			iconElement.setAttribute('data-type', menuItem.name);
 			iconElement.className = `vditor-tooltipped vditor-tooltipped__${menuItem.tipPosition}`;
 			iconElement.setAttribute('aria-label', tip);
-			iconElement.innerHTML = menuItem.icon;
+			iconElement.innerHTML = menuItem.icon!;
 			this.element.appendChild(iconElement);
 		}
 
@@ -37,7 +39,7 @@ export class MenuItem {
 		}
 		this.element.children[0].addEventListener(getEventName(), (event) => {
 			event.preventDefault();
-			if (this.element.firstElementChild.classList.contains(Constants.CLASS_MENU_DISABLED)) {
+			if (this.element.firstElementChild?.classList.contains(Constants.CLASS_MENU_DISABLED)) {
 				return;
 			}
 			if (vditor.currentMode === 'wysiwyg') {

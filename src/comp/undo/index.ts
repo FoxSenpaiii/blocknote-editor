@@ -19,9 +19,9 @@ interface IUndo {
 class Undo {
 	private stackSize = 50;
 	private dmp: DiffMatchPatch.diff_match_patch;
-	private wysiwyg: IUndo;
-	private ir: IUndo;
-	private sv: IUndo;
+	private wysiwyg!: IUndo;
+	private ir!: IUndo;
+	private sv!: IUndo;
 
 	constructor() {
 		this.resetStack();
@@ -40,20 +40,20 @@ class Undo {
 		}
 
 		if (this[vditor.currentMode].undoStack.length > 1) {
-			enableToolbar(vditor.toolbar.elements, ['undo']);
+			enableToolbar(vditor.toolbar.elements!, ['undo']);
 		} else {
-			disableToolbar(vditor.toolbar.elements, ['undo']);
+			disableToolbar(vditor.toolbar.elements!, ['undo']);
 		}
 
 		if (this[vditor.currentMode].redoStack.length !== 0) {
-			enableToolbar(vditor.toolbar.elements, ['redo']);
+			enableToolbar(vditor.toolbar.elements!, ['redo']);
 		} else {
-			disableToolbar(vditor.toolbar.elements, ['redo']);
+			disableToolbar(vditor.toolbar.elements!, ['redo']);
 		}
 	}
 
 	public undo(vditor: IEditor) {
-		if (vditor[vditor.currentMode].element.getAttribute('contenteditable') === 'false') {
+		if (vditor[vditor.currentMode]?.element.getAttribute('contenteditable') === 'false') {
 			return;
 		}
 		if (this[vditor.currentMode].undoStack.length < 2) {
@@ -71,7 +71,7 @@ class Undo {
 	}
 
 	public redo(vditor: IEditor) {
-		if (vditor[vditor.currentMode].element.getAttribute('contenteditable') === 'false') {
+		if (vditor[vditor.currentMode]?.element.getAttribute('contenteditable') === 'false') {
 			return;
 		}
 		const state = this[vditor.currentMode].redoStack.pop();
@@ -83,7 +83,7 @@ class Undo {
 	}
 
 	public recordFirstPosition(vditor: IEditor, event: KeyboardEvent) {
-		if (getSelection().rangeCount === 0) {
+		if (getSelection()?.rangeCount === 0) {
 			return;
 		}
 		if (
@@ -130,11 +130,11 @@ class Undo {
 		if (this[vditor.currentMode].hasUndo) {
 			this[vditor.currentMode].redoStack = [];
 			this[vditor.currentMode].hasUndo = false;
-			disableToolbar(vditor.toolbar.elements, ['redo']);
+			disableToolbar(vditor.toolbar?.elements!, ['redo']);
 		}
 
 		if (this[vditor.currentMode].undoStack.length > 1) {
-			enableToolbar(vditor.toolbar.elements, ['undo']);
+			enableToolbar(vditor.toolbar?.elements!, ['undo']);
 		}
 	}
 
@@ -142,7 +142,9 @@ class Undo {
 		let text;
 		if (isRedo) {
 			const redoPatchList = this.dmp.patch_deepCopy(state).reverse();
+			//@ts-ignore
 			redoPatchList.forEach((patch) => {
+				//@ts-ignore
 				patch.diffs.forEach((diff) => {
 					diff[0] = -diff[0];
 				});
@@ -153,24 +155,25 @@ class Undo {
 		}
 
 		this[vditor.currentMode].lastText = text;
-		vditor[vditor.currentMode].element.innerHTML = text;
+		vditor[vditor.currentMode]!.element.innerHTML = text;
 		if (vditor.currentMode !== 'sv') {
-			vditor[vditor.currentMode].element
+			vditor[vditor.currentMode]?.element
 				.querySelectorAll(`.vditor-${vditor.currentMode}__preview[data-render='2']`)
+				//@ts-ignore
 				.forEach((blockElement: HTMLElement) => {
 					processCodeRender(blockElement, vditor);
 				});
 		}
 
-		if (!vditor[vditor.currentMode].element.querySelector('wbr')) {
+		if (!vditor[vditor.currentMode]?.element.querySelector('wbr')) {
 			// Safari 第一次输入没有光标，需手动定位到结尾
-			const range = getSelection().getRangeAt(0);
-			range.setEndBefore(vditor[vditor.currentMode].element);
+			const range = getSelection()!.getRangeAt(0);
+			range.setEndBefore(vditor[vditor.currentMode]!.element);
 			range.collapse(false);
 		} else {
 			setRangeByWbr(
-				vditor[vditor.currentMode].element,
-				vditor[vditor.currentMode].element.ownerDocument.createRange()
+				vditor[vditor.currentMode]!.element,
+				vditor[vditor.currentMode]!.element.ownerDocument.createRange()
 			);
 			scrollCenter(vditor);
 		}
@@ -184,22 +187,23 @@ class Undo {
 		});
 		highlightToolbar(vditor);
 
-		vditor[vditor.currentMode].element
+		vditor[vditor.currentMode]?.element
 			.querySelectorAll(`.vditor-${vditor.currentMode}__preview[data-render='2']`)
+			//@ts-ignore
 			.forEach((item: HTMLElement) => {
 				processCodeRender(item, vditor);
 			});
 
 		if (this[vditor.currentMode].undoStack.length > 1) {
-			enableToolbar(vditor.toolbar.elements, ['undo']);
+			enableToolbar(vditor.toolbar?.elements!, ['undo']);
 		} else {
-			disableToolbar(vditor.toolbar.elements, ['undo']);
+			disableToolbar(vditor.toolbar?.elements!, ['undo']);
 		}
 
 		if (this[vditor.currentMode].redoStack.length !== 0) {
-			enableToolbar(vditor.toolbar.elements, ['redo']);
+			enableToolbar(vditor.toolbar?.elements!, ['redo']);
 		} else {
-			disableToolbar(vditor.toolbar.elements, ['redo']);
+			disableToolbar(vditor.toolbar?.elements!, ['redo']);
 		}
 	}
 
@@ -226,9 +230,9 @@ class Undo {
 
 	private addCaret(vditor: IEditor, setFocus = false) {
 		let cloneRange: Range;
-		if (getSelection().rangeCount !== 0 && !vditor[vditor.currentMode].element.querySelector('wbr')) {
-			const range = getSelection().getRangeAt(0);
-			if (vditor[vditor.currentMode].element.contains(range.startContainer)) {
+		if (getSelection()?.rangeCount !== 0 && !vditor[vditor.currentMode]?.element.querySelector('wbr')) {
+			const range = getSelection()!.getRangeAt(0);
+			if (vditor[vditor.currentMode]?.element.contains(range.startContainer)) {
 				cloneRange = range.cloneRange();
 				const wbrElement = document.createElement('span');
 				wbrElement.className = 'vditor-wbr';
@@ -236,9 +240,10 @@ class Undo {
 			}
 		}
 		// 移除数学公式、echart 渲染 https://github.com/siyuan-note/siyuan/issues/537
-		const cloneElement = vditor.ir.element.cloneNode(true) as HTMLElement;
+		const cloneElement = vditor.ir?.element.cloneNode(true) as HTMLElement;
 		cloneElement
 			.querySelectorAll(`.vditor-${vditor.currentMode}__preview[data-render='1']`)
+			//@ts-ignore
 			.forEach((item: HTMLElement) => {
 				if (!item.firstElementChild) {
 					return;
@@ -250,7 +255,7 @@ class Undo {
 				) {
 					item.firstElementChild.removeAttribute('_echarts_instance_');
 					item.firstElementChild.removeAttribute('data-processed');
-					item.firstElementChild.innerHTML = item.previousElementSibling.firstElementChild.innerHTML;
+					item.firstElementChild.innerHTML = item.previousElementSibling!.firstElementChild!.innerHTML;
 					item.setAttribute('data-render', '2');
 				} else if (item.firstElementChild.classList.contains('language-math')) {
 					item.setAttribute('data-render', '2');
@@ -258,12 +263,12 @@ class Undo {
 					item.firstElementChild.removeAttribute('data-math');
 				}
 			});
-		const text = vditor[vditor.currentMode].element.innerHTML;
-		vditor[vditor.currentMode].element.querySelectorAll('.vditor-wbr').forEach((item) => {
+		const text = vditor[vditor.currentMode]!.element.innerHTML;
+		vditor[vditor.currentMode]?.element.querySelectorAll('.vditor-wbr').forEach((item) => {
 			item.remove();
 			// 使用 item.outerHTML = "" 会产生 https://github.com/Vanessa219/vditor/pull/686;
 		});
-		if (setFocus && cloneRange) {
+		if (setFocus && cloneRange!) {
 			setSelectionFocus(cloneRange);
 		}
 		return text.replace('<span class="vditor-wbr"></span>', '<wbr>');

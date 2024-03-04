@@ -3,6 +3,8 @@ import { uploadFiles } from '../upload/index';
 import { getEventName } from '$util/compatibility';
 import { RecordMedia } from '$util/RecordMedia';
 import { MenuItem } from './MenuItem';
+import { IMenuItem } from '$type/toolbar';
+import { IEditor } from '$type/index';
 
 export class Record extends MenuItem {
 	constructor(vditor: IEditor, menuItem: IMenuItem) {
@@ -14,10 +16,10 @@ export class Record extends MenuItem {
 		let mediaRecorder: RecordMedia;
 		this.element.children[0].addEventListener(getEventName(), (event) => {
 			event.preventDefault();
-			if (this.element.firstElementChild.classList.contains(Constants.CLASS_MENU_DISABLED)) {
+			if (this.element.firstElementChild?.classList.contains(Constants.CLASS_MENU_DISABLED)) {
 				return;
 			}
-			const editorElement = vditor[vditor.currentMode].element;
+			const editorElement = vditor[vditor.currentMode]?.element;
 			if (!mediaRecorder) {
 				navigator.mediaDevices
 					.getUserMedia({ audio: true })
@@ -36,7 +38,7 @@ export class Record extends MenuItem {
 						};
 						mediaRecorder.startRecordingNewWavFile();
 						vditor.tip.show(window.VditorI18n.recording);
-						editorElement.setAttribute('contenteditable', 'false');
+						editorElement!.setAttribute('contenteditable', 'false');
 						this.element.children[0].classList.add('vditor-menu--current');
 					})
 					.catch(() => {
@@ -55,7 +57,7 @@ export class Record extends MenuItem {
 				this.element.children[0].classList.remove('vditor-menu--current');
 			} else {
 				vditor.tip.show(window.VditorI18n.recording);
-				editorElement.setAttribute('contenteditable', 'false');
+				editorElement!.setAttribute('contenteditable', 'false');
 				mediaRecorder.startRecordingNewWavFile();
 				this.element.children[0].classList.add('vditor-menu--current');
 			}

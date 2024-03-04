@@ -1,6 +1,8 @@
 import { setPadding, setTypewriterPosition } from '../ui/initUI';
 import { getEventName } from '$util/compatibility';
 import { MenuItem } from './MenuItem';
+import { IEditor } from '$type/index';
+import { IMenuItem } from '$type/index';
 
 export class Fullscreen extends MenuItem {
 	constructor(vditor: IEditor, menuItem: IMenuItem) {
@@ -18,11 +20,12 @@ export class Fullscreen extends MenuItem {
 				vditor.element.style.zIndex = '';
 				document.body.style.overflow = '';
 				vditor.element.classList.remove('vditor--fullscreen');
+				//@ts-ignore
 				Object.keys(vditor.toolbar.elements).forEach((key) => {
-					const svgElement = vditor.toolbar.elements[key].firstChild as HTMLElement;
+					const svgElement = vditor.toolbar?.elements![key].firstChild as HTMLElement;
 					if (svgElement) {
 						svgElement.className = svgElement.className.replace('__s', '__n');
-						vditor.options.toolbar.forEach((item) => {
+						vditor.options.toolbar?.forEach((item) => {
 							if (typeof item !== 'string' && item.tipPosition && item.name === svgElement.dataset.type) {
 								svgElement.className = `vditor-tooltipped vditor-tooltipped__${item.tipPosition}`;
 							}
@@ -36,11 +39,12 @@ export class Fullscreen extends MenuItem {
 				if (!menuItem.level) {
 					this.innerHTML = '<svg><use xlink:href="#vditor-icon-contract"></use></svg>';
 				}
-				vditor.element.style.zIndex = vditor.options.fullscreen.index.toString();
+				vditor.element.style.zIndex = vditor.options.fullscreen!.index.toString();
 				document.body.style.overflow = 'hidden';
 				vditor.element.classList.add('vditor--fullscreen');
+				//@ts-ignore
 				Object.keys(vditor.toolbar.elements).forEach((key) => {
-					const svgElement = vditor.toolbar.elements[key].firstChild as HTMLElement;
+					const svgElement = vditor.toolbar?.elements![key].firstChild as HTMLElement;
 					if (svgElement) {
 						svgElement.className = svgElement.className.replace('__n', '__s');
 					}

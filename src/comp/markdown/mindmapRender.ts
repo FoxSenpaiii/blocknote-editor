@@ -1,6 +1,7 @@
 import { Constants } from '$const';
 import { addScript } from '$util/addScript';
 import { mindmapRenderAdapter } from './adapterRender';
+import { IEChart } from '$type/echart';
 
 declare const echarts: {
 	init(element: HTMLElement, theme?: string): IEChart;
@@ -10,10 +11,11 @@ export const mindmapRender = (element: HTMLElement | Document = document, cdn = 
 	const mindmapElements = mindmapRenderAdapter.getElements(element);
 	if (mindmapElements.length > 0) {
 		addScript(`${cdn}/dist/js/echarts/echarts.min.js`, 'vditorEchartsScript').then(() => {
+			//@ts-ignore
 			mindmapElements.forEach((e: HTMLDivElement) => {
 				if (
-					e.parentElement.classList.contains('vditor-wysiwyg__pre') ||
-					e.parentElement.classList.contains('vditor-ir__marker--pre')
+					e.parentElement?.classList.contains('vditor-wysiwyg__pre') ||
+					e.parentElement?.classList.contains('vditor-ir__marker--pre')
 				) {
 					return;
 				}

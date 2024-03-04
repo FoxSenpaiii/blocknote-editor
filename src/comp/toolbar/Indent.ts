@@ -4,6 +4,8 @@ import { listIndent } from '$util/fixBrowserBehavior';
 import { hasClosestByMatchTag } from '$util/hasClosest';
 import { getEditorRange } from '$util/selection';
 import { MenuItem } from './MenuItem';
+import { IEditor } from '$type/index';
+import { IMenuItem } from '$type/index';
 
 export class Indent extends MenuItem {
 	constructor(vditor: IEditor, menuItem: IMenuItem) {
@@ -12,7 +14,7 @@ export class Indent extends MenuItem {
 		this.element.children[0].addEventListener(getEventName(), (event) => {
 			event.preventDefault();
 			if (
-				this.element.firstElementChild.classList.contains(Constants.CLASS_MENU_DISABLED) ||
+				this.element.firstElementChild?.classList.contains(Constants.CLASS_MENU_DISABLED) ||
 				vditor.currentMode === 'sv'
 			) {
 				return;

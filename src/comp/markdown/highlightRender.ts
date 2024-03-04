@@ -1,6 +1,7 @@
 import { Constants } from '$const';
 import { addScript } from '$util/addScript';
 import { addStyle } from '$util/addStyle';
+import { IHljs } from '$type/hljs';
 
 declare const hljs: {
 	highlightElement(element: Element): void;
@@ -11,8 +12,8 @@ export const highlightRender = (
 	element: HTMLElement | Document = document,
 	cdn = Constants.CDN
 ) => {
-	let style = hljsOption.style;
-	if (!Constants.CODE_THEME.includes(style)) {
+	let style = hljsOption?.style;
+	if (!Constants.CODE_THEME.includes(style!)) {
 		style = 'github';
 	}
 	const vditorHljsStyle = document.getElementById('vditorHljsStyle') as HTMLLinkElement;
@@ -22,7 +23,7 @@ export const highlightRender = (
 	}
 	addStyle(`${cdn}/dist/js/highlight.js/styles/${style}.css`, 'vditorHljsStyle');
 
-	if (hljsOption.enable === false) {
+	if (hljsOption?.enable === false) {
 		return;
 	}
 
@@ -37,8 +38,8 @@ export const highlightRender = (
 				element.querySelectorAll('pre > code').forEach((block) => {
 					// ir & wysiwyg 区域不渲染
 					if (
-						block.parentElement.classList.contains('vditor-ir__marker--pre') ||
-						block.parentElement.classList.contains('vditor-wysiwyg__pre')
+						block.parentElement?.classList.contains('vditor-ir__marker--pre') ||
+						block.parentElement?.classList.contains('vditor-wysiwyg__pre')
 					) {
 						return;
 					}
@@ -56,18 +57,18 @@ export const highlightRender = (
 						return;
 					}
 
-					if (hljsOption.defaultLang !== '' && block.className.indexOf('language-') === -1) {
-						block.classList.add('language-' + hljsOption.defaultLang);
+					if (hljsOption?.defaultLang !== '' && block.className.indexOf('language-') === -1) {
+						block.classList.add('language-' + hljsOption?.defaultLang);
 					}
 
 					hljs.highlightElement(block);
 
-					if (!hljsOption.lineNumber) {
+					if (!hljsOption?.lineNumber) {
 						return;
 					}
 
 					block.classList.add('vditor-linenumber');
-					let linenNumberTemp: HTMLDivElement = block.querySelector('.vditor-linenumber__temp');
+					let linenNumberTemp: HTMLDivElement = block.querySelector('.vditor-linenumber__temp')!;
 					if (!linenNumberTemp) {
 						linenNumberTemp = document.createElement('div');
 						linenNumberTemp.className = 'vditor-linenumber__temp';
@@ -79,7 +80,7 @@ export const highlightRender = (
 						isSoftWrap = true;
 					}
 					let lineNumberHTML = '';
-					const lineList = block.textContent.split(/\r\n|\r|\n/g);
+					const lineList = block.textContent!.split(/\r\n|\r|\n/g);
 					lineList.pop();
 					lineList.map((line) => {
 						let lineHeight = '';

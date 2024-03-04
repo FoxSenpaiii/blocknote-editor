@@ -6,6 +6,8 @@ import { afterRenderEvent } from '../wysiwyg/afterRenderEvent';
 import { removeHeading, setHeading } from '../wysiwyg/setHeading';
 import { MenuItem } from './MenuItem';
 import { hidePanel } from './setToolbar';
+import { IEditor } from '$type/index';
+import { IMenuItem } from '$type/index';
 
 export class Headings extends MenuItem {
 	public element: HTMLElement;
@@ -24,7 +26,7 @@ export class Headings extends MenuItem {
 <button data-tag="h5" data-value="##### ">${window.VditorI18n.heading5} &lt;${updateHotkeyTip('⌥⌘5')}></button>
 <button data-tag="h6" data-value="###### ">${window.VditorI18n.heading6} &lt;${updateHotkeyTip('⌥⌘6')}></button>`;
 
-		this.element.appendChild(panelElement);
+		this!.element.appendChild(panelElement);
 
 		this._bindEvent(vditor, panelElement);
 	}
@@ -34,9 +36,9 @@ export class Headings extends MenuItem {
 		actionBtn.addEventListener(getEventName(), (event) => {
 			event.preventDefault();
 			// https://github.com/Vanessa219/vditor/issues/1391
-			clearTimeout(vditor.wysiwyg.afterRenderTimeoutId);
-			clearTimeout(vditor.ir.processTimeoutId);
-			clearTimeout(vditor.sv.processTimeoutId);
+			clearTimeout(vditor.wysiwyg?.afterRenderTimeoutId);
+			clearTimeout(vditor.ir?.processTimeoutId);
+			clearTimeout(vditor.sv?.processTimeoutId);
 			if (actionBtn.classList.contains(Constants.CLASS_MENU_DISABLED)) {
 				return;
 			}
@@ -56,17 +58,18 @@ export class Headings extends MenuItem {
 		});
 
 		for (let i = 0; i < 6; i++) {
+			//@ts-ignore
 			panelElement.children.item(i).addEventListener(getEventName(), (event: Event) => {
 				event.preventDefault();
 				if (vditor.currentMode === 'wysiwyg') {
-					setHeading(vditor, (event.target as HTMLElement).getAttribute('data-tag'));
+					setHeading(vditor, (event.target as HTMLElement).getAttribute('data-tag')!);
 					afterRenderEvent(vditor);
 					actionBtn.classList.add('vditor-menu--current');
 				} else if (vditor.currentMode === 'ir') {
-					processHeading(vditor, (event.target as HTMLElement).getAttribute('data-value'));
+					processHeading(vditor, (event.target as HTMLElement).getAttribute('data-value')!);
 					actionBtn.classList.add('vditor-menu--current');
 				} else {
-					processHeadingSV(vditor, (event.target as HTMLElement).getAttribute('data-value'));
+					processHeadingSV(vditor, (event.target as HTMLElement).getAttribute('data-value')!);
 				}
 				panelElement.style.display = 'none';
 			});

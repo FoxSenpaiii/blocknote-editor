@@ -7,6 +7,7 @@ import { log } from '$util/log';
 import { getEditorRange, setRangeByWbr } from '$util/selection';
 import { inputEvent } from './inputEvent';
 import { combineFootnote } from './combineFootnote';
+import { IEditor } from '$type/index';
 
 export const processPaste = (vditor: IEditor, text: string) => {
 	const range = getEditorRange(vditor);
@@ -15,9 +16,9 @@ export const processPaste = (vditor: IEditor, text: string) => {
 	range.insertNode(document.createTextNode(text));
 	let blockElement = hasClosestByAttribute(range.startContainer, 'data-block', '0');
 	if (!blockElement) {
-		blockElement = vditor.sv.element;
+		blockElement = vditor.sv!.element;
 	}
-	let spinHTML = vditor.lute.SpinVditorSVDOM(blockElement.textContent);
+	let spinHTML = vditor.lute.SpinVditorSVDOM(blockElement.textContent!);
 	spinHTML =
 		"<div data-block='0'>" +
 		spinHTML.replace(
@@ -25,13 +26,13 @@ export const processPaste = (vditor: IEditor, text: string) => {
 			'<span data-type="newline"><br /><span style="display: none">\n</span></span><span data-type="newline"><br /><span style="display: none">\n</span></span></div><div data-block="0"><'
 		) +
 		'</div>';
-	if (blockElement.isEqualNode(vditor.sv.element)) {
+	if (blockElement.isEqualNode(vditor.sv!.element)) {
 		blockElement.innerHTML = spinHTML;
 	} else {
 		blockElement.outerHTML = spinHTML;
 	}
-	combineFootnote(vditor.sv.element);
-	setRangeByWbr(vditor.sv.element, range);
+	combineFootnote(vditor.sv!.element);
+	setRangeByWbr(vditor.sv!.element, range);
 
 	scrollCenter(vditor);
 };
@@ -39,23 +40,23 @@ export const processPaste = (vditor: IEditor, text: string) => {
 export const getSideByType = (spanNode: Node, type: string, isPrevious = true) => {
 	let sideElement = spanNode as Element;
 	if (sideElement.nodeType === 3) {
-		sideElement = sideElement.parentElement;
+		sideElement = sideElement.parentElement!;
 	}
 	while (sideElement) {
 		if (sideElement.getAttribute('data-type') === type) {
 			return sideElement;
 		}
 		if (isPrevious) {
-			sideElement = sideElement.previousElementSibling;
+			sideElement = sideElement.previousElementSibling!;
 		} else {
-			sideElement = sideElement.nextElementSibling;
+			sideElement = sideElement.nextElementSibling!;
 		}
 	}
 	return false;
 };
 
 export const processSpinVditorSVDOM = (html: string, vditor: IEditor) => {
-	log('SpinVditorSVDOM', html, 'argument', vditor.options.debugger);
+	log('SpinVditorSVDOM', html, 'argument', vditor.options.debugger!);
 	const spinHTML = vditor.lute.SpinVditorSVDOM(html);
 	html =
 		"<div data-block='0'>" +
@@ -64,7 +65,7 @@ export const processSpinVditorSVDOM = (html: string, vditor: IEditor) => {
 			'<span data-type="newline"><br /><span style="display: none">\n</span></span><span data-type="newline"><br /><span style="display: none">\n</span></span></div><div data-block="0"><'
 		) +
 		'</div>';
-	log('SpinVditorSVDOM', html, 'result', vditor.options.debugger);
+	log('SpinVditorSVDOM', html, 'result', vditor.options.debugger!);
 	return html;
 };
 
@@ -103,19 +104,19 @@ export const processPreviousMarkers = (spanElement: HTMLElement) => {
 				(spanType === 'code-block-open-marker' || spanType === 'code-block-info')
 			) {
 				// https://github.com/Vanessa219/vditor/issues/586
-				markerText = previousText.replace(/\S/g, ' ') + markerText;
+				markerText = previousText!.replace(/\S/g, ' ') + markerText;
 			} else if (
 				spanType === 'code-block-close-marker' &&
-				previousElement.nextElementSibling.isSameNode(spanElement)
+				previousElement.nextElementSibling?.isSameNode(spanElement)
 			) {
 				// https://github.com/Vanessa219/vditor/issues/594
 				const openMarker = getSideByType(spanElement, 'code-block-open-marker');
 				if (openMarker && openMarker.previousElementSibling) {
 					previousElement = openMarker.previousElementSibling;
-					markerText = previousText + markerText;
+					markerText = previousText + markerText!;
 				}
 			} else {
-				markerText = previousText + markerText;
+				markerText = previousText + markerText!;
 			}
 		} else if (previousType === 'newline') {
 			hasNL = true;
@@ -137,21 +138,21 @@ export const processAfterRender = (
 		vditor.hint.render(vditor);
 	}
 
-	vditor.preview.render(vditor);
+	vditor.preview?.render(vditor);
 
 	const text = getMarkdown(vditor);
 	if (typeof vditor.options.input === 'function' && options.enableInput) {
 		vditor.options.input(text);
 	}
 
-	if (vditor.options.counter.enable) {
-		vditor.counter.render(vditor, text);
+	if (vditor.options.counter?.enable) {
+		vditor.counter?.render(vditor, text);
 	}
 
-	if (vditor.options.cache.enable && accessLocalStorage()) {
-		localStorage.setItem(vditor.options.cache.id, text);
-		if (vditor.options.cache.after) {
-			vditor.options.cache.after(text);
+	if (vditor.options.cache?.enable && accessLocalStorage()) {
+		localStorage.setItem(vditor.options.cache?.id!, text);
+		if (vditor.options.cache?.after) {
+			vditor.options.cache?.after(text);
 		}
 	}
 
@@ -159,10 +160,10 @@ export const processAfterRender = (
 		vditor.devtools.renderEchart(vditor);
 	}
 
-	clearTimeout(vditor.sv.processTimeoutId);
-	vditor.sv.processTimeoutId = window.setTimeout(() => {
-		if (options.enableAddUndoStack && !vditor.sv.composingLock) {
-			vditor.undo.addToUndoStack(vditor);
+	clearTimeout(vditor.sv?.processTimeoutId);
+	vditor.sv!.processTimeoutId = window.setTimeout(() => {
+		if (options.enableAddUndoStack && !vditor.sv?.composingLock) {
+			vditor.undo?.addToUndoStack(vditor);
 		}
 	}, vditor.options.undoDelay);
 };
@@ -170,7 +171,7 @@ export const processAfterRender = (
 export const processHeading = (vditor: IEditor, value: string) => {
 	const range = getEditorRange(vditor);
 	const headingElement = hasClosestByTag(range.startContainer, 'SPAN');
-	if (headingElement && headingElement.textContent.trim() !== '') {
+	if (headingElement && headingElement.textContent?.trim() !== '') {
 		value = '\n' + value;
 	}
 	range.collapse(true);
@@ -181,10 +182,10 @@ export const processToolbar = (vditor: IEditor, actionBtn: Element, prefix: stri
 	const range = getEditorRange(vditor);
 	const commandName = actionBtn.getAttribute('data-type');
 	// 添加
-	if (vditor.sv.element.childNodes.length === 0) {
-		vditor.sv.element.innerHTML = `<span data-type="p" data-block="0"><span data-type="text"><wbr></span></span><span data-type="newline"><br><span style="display: none">
+	if (vditor.sv?.element.childNodes.length === 0) {
+		vditor.sv!.element.innerHTML = `<span data-type="p" data-block="0"><span data-type="text"><wbr></span></span><span data-type="newline"><br><span style="display: none">
 </span></span>`;
-		setRangeByWbr(vditor.sv.element, range);
+		setRangeByWbr(vditor.sv!.element, range);
 	}
 	const blockElement = hasClosestBlock(range.startContainer);
 	const spanElement = hasClosestByTag(range.startContainer, 'SPAN');
@@ -248,6 +249,6 @@ export const processToolbar = (vditor: IEditor, actionBtn: Element, prefix: stri
 			return;
 		}
 	}
-	setRangeByWbr(vditor.sv.element, range);
+	setRangeByWbr(vditor.sv!.element, range);
 	processAfterRender(vditor);
 };

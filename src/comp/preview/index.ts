@@ -17,6 +17,7 @@ import { hasClosestByTag } from '$util/hasClosestByHeadings';
 import { setSelectionFocus } from '$util/selection';
 import { previewImage } from './image';
 import { IEditor } from '$type';
+import { IPreviewActionCustom } from '$type';
 
 export class Preview {
 	public element: HTMLElement;
@@ -123,9 +124,10 @@ export class Preview {
 				return;
 			}
 			const type = btn.getAttribute('data-type');
+			//@ts-ignore
 			const actionCustom = actions.find((w: IPreviewActionCustom) => w?.key === type) as IPreviewActionCustom;
 			if (actionCustom) {
-				actionCustom.click(type);
+				actionCustom.click(type!);
 				return;
 			}
 
@@ -141,7 +143,7 @@ export class Preview {
 			} else {
 				this.previewElement.style.width = '360px';
 			}
-			if (this.previewElement.scrollWidth > this.previewElement.parentElement.clientWidth) {
+			if (this.previewElement.scrollWidth > this.previewElement.parentElement!.clientWidth) {
 				this.previewElement.style.width = 'auto';
 			}
 			this.render(vditor);
@@ -176,9 +178,9 @@ export class Preview {
 		const renderStartTime = new Date().getTime();
 		const markdownText = getMarkdown(vditor);
 		this.mdTimeoutId = window.setTimeout(() => {
-			if (vditor.options.preview.url) {
+			if (vditor.options.preview?.url) {
 				const xhr = new XMLHttpRequest();
-				xhr.open('POST', vditor.options.preview.url);
+				xhr.open('POST', vditor.options.preview!.url);
 				xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
 				xhr.onreadystatechange = () => {
 					if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -188,15 +190,15 @@ export class Preview {
 								vditor.tip.show(responseJSON.msg);
 								return;
 							}
-							if (vditor.options.preview.transform) {
-								responseJSON.data = vditor.options.preview.transform(responseJSON.data);
+							if (vditor.options.preview?.transform) {
+								responseJSON.data = vditor.options.preview?.transform(responseJSON.data);
 							}
 							this.previewElement.innerHTML = responseJSON.data;
 							this.afterRender(vditor, renderStartTime);
 						} else {
 							let html = vditor.lute.Md2HTML(markdownText);
-							if (vditor.options.preview.transform) {
-								html = vditor.options.preview.transform(html);
+							if (vditor.options.preview?.transform) {
+								html = vditor.options.preview!.transform(html);
 							}
 							this.previewElement.innerHTML = html;
 							this.afterRender(vditor, renderStartTime);
@@ -207,72 +209,75 @@ export class Preview {
 				xhr.send(JSON.stringify({ markdownText }));
 			} else {
 				let html = vditor.lute.Md2HTML(markdownText);
-				if (vditor.options.preview.transform) {
-					html = vditor.options.preview.transform(html);
+				if (vditor.options.preview?.transform) {
+					html = vditor.options.preview!.transform(html);
 				}
 				this.previewElement.innerHTML = html;
 				this.afterRender(vditor, renderStartTime);
 			}
-		}, vditor.options.preview.delay);
+		}, vditor.options.preview?.delay);
 	}
 
 	private afterRender(vditor: IEditor, startTime: number) {
-		if (vditor.options.preview.parse) {
-			vditor.options.preview.parse(this.element);
+		if (vditor.options.preview?.parse) {
+			vditor.options.preview?.parse(this.element);
 		}
 		const time = new Date().getTime() - startTime;
 		if (new Date().getTime() - startTime > 2600) {
 			// https://github.com/b3log/vditor/issues/67
 			vditor.tip.show(window.VditorI18n.performanceTip.replace('${x}', time.toString()));
-			vditor.preview.element.setAttribute('data-type', 'renderPerformance');
-		} else if (vditor.preview.element.getAttribute('data-type') === 'renderPerformance') {
+			vditor.preview?.element.setAttribute('data-type', 'renderPerformance');
+		} else if (vditor.preview?.element.getAttribute('data-type') === 'renderPerformance') {
 			vditor.tip.hide();
-			vditor.preview.element.removeAttribute('data-type');
+			vditor.preview?.element.removeAttribute('data-type');
 		}
-		const cmtFocusElement = vditor.preview.element.querySelector('.vditor-comment--focus');
+		const cmtFocusElement = vditor.preview?.element.querySelector('.vditor-comment--focus');
 		if (cmtFocusElement) {
 			cmtFocusElement.classList.remove('vditor-comment--focus');
 		}
-		codeRender(vditor.preview.previewElement, vditor.options.preview.hljs);
-		highlightRender(vditor.options.preview.hljs, vditor.preview.previewElement, vditor.options.cdn);
-		mermaidRender(vditor.preview.previewElement, vditor.options.cdn, vditor.options.theme);
-		markmapRender(vditor.preview.previewElement, vditor.options.cdn, vditor.options.theme);
-		flowchartRender(vditor.preview.previewElement, vditor.options.cdn);
-		graphvizRender(vditor.preview.previewElement, vditor.options.cdn);
-		chartRender(vditor.preview.previewElement, vditor.options.cdn, vditor.options.theme);
-		mindmapRender(vditor.preview.previewElement, vditor.options.cdn, vditor.options.theme);
-		plantumlRender(vditor.preview.previewElement, vditor.options.cdn);
-		abcRender(vditor.preview.previewElement, vditor.options.cdn);
-		mediaRender(vditor.preview.previewElement);
-		vditor.options.customRenders.forEach((item) => {
-			item.render(vditor.preview.previewElement, vditor);
+		codeRender(vditor.preview!.previewElement, vditor.options.preview?.hljs);
+		highlightRender(vditor.options.preview?.hljs, vditor.preview?.previewElement, vditor.options.cdn);
+		mermaidRender(vditor.preview!.previewElement, vditor.options.cdn, vditor.options.theme);
+		markmapRender(vditor.preview!.previewElement, vditor.options.cdn, vditor.options.theme);
+		flowchartRender(vditor.preview!.previewElement, vditor.options.cdn);
+		graphvizRender(vditor.preview!.previewElement, vditor.options.cdn);
+		chartRender(vditor.preview?.previewElement, vditor.options.cdn, vditor.options.theme);
+		mindmapRender(vditor.preview?.previewElement, vditor.options.cdn, vditor.options.theme);
+		plantumlRender(vditor.preview?.previewElement, vditor.options.cdn);
+		abcRender(vditor.preview?.previewElement, vditor.options.cdn);
+		mediaRender(vditor.preview!.previewElement);
+		vditor.options.customRenders?.forEach((item) => {
+			item.render(vditor.preview!.previewElement, vditor);
 		});
 		// toc render
-		const editorElement = vditor.preview.element;
+		const editorElement = vditor.preview?.element;
 		let tocHTML = vditor.outline.render(vditor);
 		if (tocHTML === '') {
 			tocHTML = '[ToC]';
 		}
+		//@ts-ignore
 		editorElement.querySelectorAll('[data-type="toc-block"]').forEach((item: HTMLElement) => {
 			item.innerHTML = tocHTML;
 			mathRender(item, {
 				cdn: vditor.options.cdn,
-				math: vditor.options.preview.math
+				math: vditor.options.preview?.math
 			});
 		});
-		mathRender(vditor.preview.previewElement, {
+		mathRender(vditor.preview!.previewElement, {
 			cdn: vditor.options.cdn,
-			math: vditor.options.preview.math
+			math: vditor.options.preview?.math
 		});
 	}
 
 	private copyToX(vditor: IEditor, copyElement: HTMLElement, type = 'mp-wechat') {
 		// fix math render
 		if (type !== 'zhihu') {
+			//@ts-ignore
 			copyElement.querySelectorAll('.katex-html .base').forEach((item: HTMLElement) => {
 				item.style.display = 'initial';
 			});
 		} else {
+			//@ts-ignore
 			copyElement.querySelectorAll('.language-math').forEach((item: HTMLElement) => {
 				item.outerHTML = `<img class="Formula-image" data-eeimg="true" src="//www.zhihu.com/equation?tex=" alt="${item.getAttribute(
 					'data-math'

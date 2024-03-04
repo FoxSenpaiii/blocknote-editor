@@ -26,6 +26,8 @@ import { Redo } from './Redo';
 import { toggleSubMenu } from './setToolbar';
 import { Undo } from './Undo';
 import { Upload } from './Upload';
+import { IEditor } from '$type/index';
+import { IMenuItem } from '$type/index';
 
 export class Toolbar {
 	public elements: { [key: string]: HTMLElement };
@@ -37,33 +39,34 @@ export class Toolbar {
 
 		this.element = document.createElement('div');
 		this.element.className = 'vditor-toolbar';
-
+		//@ts-ignore
 		options.toolbar.forEach((menuItem: IMenuItem, i: number) => {
 			const itemElement = this.genItem(vditor, menuItem, i);
-			this.element.appendChild(itemElement);
+			this.element.appendChild(itemElement!);
 			if (menuItem.toolbar) {
 				const panelElement = document.createElement('div');
 				panelElement.className = 'vditor-hint vditor-panel--arrow';
 				panelElement.addEventListener(getEventName(), (event) => {
 					panelElement.style.display = 'none';
 				});
+				//@ts-ignore
 				menuItem.toolbar.forEach((subMenuItem: IMenuItem, subI: number) => {
 					subMenuItem.level = 2;
-					panelElement.appendChild(this.genItem(vditor, subMenuItem, i + subI));
+					panelElement.appendChild(this.genItem(vditor, subMenuItem, i + subI)!);
 				});
-				itemElement.appendChild(panelElement);
-				toggleSubMenu(vditor, panelElement, itemElement.children[0], 2);
+				itemElement?.appendChild(panelElement);
+				toggleSubMenu(vditor, panelElement, itemElement!.children[0], 2);
 			}
 		});
 
-		if (vditor.options.toolbarConfig.hide) {
+		if (vditor.options.toolbarConfig?.hide) {
 			this.element.classList.add('vditor-toolbar--hide');
 		}
-		if (vditor.options.toolbarConfig.pin) {
+		if (vditor.options.toolbarConfig?.pin) {
 			this.element.classList.add('vditor-toolbar--pin');
 		}
 
-		if (vditor.options.counter.enable) {
+		if (vditor.options.counter?.enable) {
 			vditor.counter = new Counter(vditor);
 			this.element.appendChild(vditor.counter.element);
 		}

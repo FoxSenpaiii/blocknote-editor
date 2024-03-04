@@ -6,6 +6,8 @@ import { listToggle } from '$util/fixBrowserBehavior';
 import { hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByMatchTag } from '$util/hasClosest';
 import { getEditorRange, getSelectPosition, setRangeByWbr, setSelectionFocus } from '$util/selection';
 import { highlightToolbarIR } from './highlightToolbarIR';
+import { IEditor } from '$type/index';
+import { IHintData } from '$type/index';
 import { input } from './input';
 
 export const processHint = (vditor: IEditor) => {
@@ -14,16 +16,16 @@ export const processHint = (vditor: IEditor) => {
 	// 代码块语言提示
 	const preBeforeElement = hasClosestByAttribute(startContainer, 'data-type', 'code-block-info');
 	if (preBeforeElement) {
-		if (preBeforeElement.textContent.replace(Constants.ZWSP, '') === '' && vditor.hint.recentLanguage) {
+		if (preBeforeElement.textContent?.replace(Constants.ZWSP, '') === '' && vditor.hint.recentLanguage) {
 			preBeforeElement.textContent = Constants.ZWSP + vditor.hint.recentLanguage;
 			const range = getEditorRange(vditor);
 			range.selectNodeContents(preBeforeElement);
 		} else {
 			const matchLangData: IHintData[] = [];
-			const key = preBeforeElement.textContent
-				.substring(0, getSelectPosition(preBeforeElement, vditor.ir.element).start)
+			const key = preBeforeElement
+				.textContent!.substring(0, getSelectPosition(preBeforeElement, vditor.ir!.element).start)
 				.replace(Constants.ZWSP, '');
-			(vditor.options.preview.hljs.langs || Constants.CODE_LANGUAGES).forEach((keyName) => {
+			(vditor.options.preview?.hljs?.langs || Constants.CODE_LANGUAGES).forEach((keyName) => {
 				if (keyName.indexOf(key.toLowerCase()) > -1) {
 					matchLangData.push({
 						html: keyName,
@@ -48,9 +50,9 @@ export const processAfterRender = (
 		processHint(vditor);
 	}
 
-	clearTimeout(vditor.ir.processTimeoutId);
-	vditor.ir.processTimeoutId = window.setTimeout(() => {
-		if (vditor.ir.composingLock) {
+	clearTimeout(vditor.ir?.processTimeoutId);
+	vditor.ir!.processTimeoutId = window.setTimeout(() => {
+		if (vditor.ir?.composingLock) {
 			return;
 		}
 		const text = getMarkdown(vditor);
@@ -58,14 +60,14 @@ export const processAfterRender = (
 			vditor.options.input(text);
 		}
 
-		if (vditor.options.counter.enable) {
-			vditor.counter.render(vditor, text);
+		if (vditor.options.counter?.enable) {
+			vditor.counter?.render(vditor, text);
 		}
 
-		if (vditor.options.cache.enable && accessLocalStorage()) {
-			localStorage.setItem(vditor.options.cache.id, text);
-			if (vditor.options.cache.after) {
-				vditor.options.cache.after(text);
+		if (vditor.options.cache?.enable && accessLocalStorage()) {
+			localStorage.setItem(vditor.options.cache?.id!, text);
+			if (vditor.options.cache?.after) {
+				vditor.options.cache?.after(text);
 			}
 		}
 
@@ -74,7 +76,7 @@ export const processAfterRender = (
 		}
 
 		if (options.enableAddUndoStack) {
-			vditor.undo.addToUndoStack(vditor);
+			vditor.undo?.addToUndoStack(vditor);
 		}
 	}, vditor.options.undoDelay);
 };
@@ -99,12 +101,12 @@ export const processHeading = (vditor: IEditor, value: string) => {
 const removeInline = (range: Range, vditor: IEditor, type: string) => {
 	const inlineElement = hasClosestByAttribute(range.startContainer, 'data-type', type) as HTMLElement;
 	if (inlineElement) {
-		inlineElement.firstElementChild.remove();
-		inlineElement.lastElementChild.remove();
+		inlineElement.firstElementChild?.remove();
+		inlineElement.lastElementChild?.remove();
 		range.insertNode(document.createElement('wbr'));
 		const tempElement = document.createElement('div');
 		tempElement.innerHTML = vditor.lute.SpinVditorIRDOM(inlineElement.outerHTML);
-		inlineElement.outerHTML = tempElement.firstElementChild.innerHTML.trim();
+		inlineElement.outerHTML = tempElement.firstElementChild!.innerHTML.trim();
 	}
 };
 
@@ -113,7 +115,7 @@ export const processToolbar = (vditor: IEditor, actionBtn: Element, prefix: stri
 	const commandName = actionBtn.getAttribute('data-type');
 	let typeElement = range.startContainer as HTMLElement;
 	if (typeElement.nodeType === 3) {
-		typeElement = typeElement.parentElement;
+		typeElement = typeElement.parentElement!;
 	}
 	let useHighlight = true;
 	// 移除
@@ -135,7 +137,7 @@ export const processToolbar = (vditor: IEditor, actionBtn: Element, prefix: stri
 					range.insertNode(document.createElement('wbr'));
 					aElement.outerHTML = aTextElement.innerHTML;
 				} else {
-					aElement.outerHTML = aElement.querySelector('.vditor-ir__link').innerHTML + '<wbr>';
+					aElement.outerHTML = aElement.querySelector('.vditor-ir__link')?.innerHTML + '<wbr>';
 				}
 			}
 		} else if (commandName === 'italic') {
@@ -153,9 +155,9 @@ export const processToolbar = (vditor: IEditor, actionBtn: Element, prefix: stri
 		}
 	} else {
 		// 添加
-		if (vditor.ir.element.childNodes.length === 0) {
-			vditor.ir.element.innerHTML = '<p data-block="0"><wbr></p>';
-			setRangeByWbr(vditor.ir.element, range);
+		if (vditor.ir?.element.childNodes.length === 0) {
+			vditor.ir!.element.innerHTML = '<p data-block="0"><wbr></p>';
+			setRangeByWbr(vditor.ir!.element, range);
 		}
 		const blockElement = hasClosestBlock(range.startContainer);
 		if (commandName === 'line') {
@@ -215,17 +217,17 @@ export const processToolbar = (vditor: IEditor, actionBtn: Element, prefix: stri
 			input(vditor, range);
 
 			if (commandName === 'table') {
-				range.selectNodeContents(getSelection().getRangeAt(0).startContainer.parentElement);
+				range.selectNodeContents(getSelection()?.getRangeAt(0).startContainer.parentElement!);
 				setSelectionFocus(range);
 			}
 		} else if (commandName === 'check' || commandName === 'list' || commandName === 'ordered-list') {
 			listToggle(vditor, range, commandName, false);
 			useHighlight = false;
-			removeCurrentToolbar(vditor.toolbar.elements, ['check', 'list', 'ordered-list']);
+			removeCurrentToolbar(vditor.toolbar?.elements!, ['check', 'list', 'ordered-list']);
 			actionBtn.classList.add('vditor-menu--current');
 		}
 	}
-	setRangeByWbr(vditor.ir.element, range);
+	setRangeByWbr(vditor.ir!.element, range);
 	processAfterRender(vditor);
 	if (useHighlight) {
 		highlightToolbarIR(vditor);

@@ -1,5 +1,7 @@
 import { getEventName } from '$util/compatibility';
 import { MenuItem } from './MenuItem';
+import { IEditor } from '$type/index';
+import { IMenuItem } from '$type/index';
 
 export class Help extends MenuItem {
 	constructor(vditor: IEditor, menuItem: IMenuItem) {

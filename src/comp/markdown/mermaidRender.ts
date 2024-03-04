@@ -39,7 +39,7 @@ export const mermaidRender = (element: HTMLElement, cdn = Constants.CDN, theme: 
 		mermaid.initialize(config);
 		mermaidElements.forEach((item) => {
 			const code = mermaidRenderAdapter.getCode(item);
-			if (item.getAttribute('data-processed') === 'true' || code.trim() === '') {
+			if (item.getAttribute('data-processed') === 'true' || code?.trim() === '') {
 				return;
 			}
 			mermaid.init(undefined, item);

@@ -3,6 +3,7 @@ import { isHeadingMD, isHrMD } from '$util/fixBrowserBehavior';
 import { getTopList, hasClosestBlock, hasClosestByAttribute, hasClosestByClassName } from '$util/hasClosest';
 import { hasClosestByTag } from '$util/hasClosestByHeadings';
 import { log } from '$util/log';
+import { IEditor } from '$type/index';
 import { processCodeRender } from '$util/processCode';
 import { getSelectPosition, setRangeByWbr } from '$util/selection';
 import { renderToc } from '$util/toc';
@@ -21,20 +22,20 @@ export const input = (vditor: IEditor, range: Range, ignoreSpace = false, event?
 		}
 
 		// 前后空格处理
-		const startOffset = getSelectPosition(blockElement, vditor.ir.element, range).start;
+		const startOffset = getSelectPosition(blockElement, vditor.ir!.element, range).start;
 
 		// 开始可以输入空格
 		let startSpace = true;
 		for (
 			let i = startOffset - 1;
 			// 软换行后有空格
-			i > blockElement.textContent.substr(0, startOffset).lastIndexOf('\n');
+			i > blockElement.textContent!.substr(0, startOffset).lastIndexOf('\n');
 			i--
 		) {
 			if (
-				blockElement.textContent.charAt(i) !== ' ' &&
+				blockElement.textContent?.charAt(i) !== ' ' &&
 				// 多个 tab 前删除不形成代码块 https://github.com/Vanessa219/vditor/issues/162 1
-				blockElement.textContent.charAt(i) !== '\t'
+				blockElement.textContent?.charAt(i) !== '\t'
 			) {
 				startSpace = false;
 				break;
@@ -46,8 +47,8 @@ export const input = (vditor: IEditor, range: Range, ignoreSpace = false, event?
 
 		// 结尾可以输入空格
 		let endSpace = true;
-		for (let i = startOffset - 1; i < blockElement.textContent.length; i++) {
-			if (blockElement.textContent.charAt(i) !== ' ' && blockElement.textContent.charAt(i) !== '\n') {
+		for (let i = startOffset - 1; i < blockElement.textContent!.length; i++) {
+			if (blockElement.textContent?.charAt(i) !== ' ' && blockElement.textContent?.charAt(i) !== '\n') {
 				endSpace = false;
 				break;
 			}
@@ -80,37 +81,38 @@ export const input = (vditor: IEditor, range: Range, ignoreSpace = false, event?
 			}
 		}
 	}
-
+	//@ts-ignore
 	vditor.ir.element.querySelectorAll('.vditor-ir__node--expand').forEach((item) => {
 		item.classList.remove('vditor-ir__node--expand');
 	});
 
 	if (!blockElement) {
 		// 使用顶级块元素，应使用 innerHTML
-		blockElement = vditor.ir.element;
+		blockElement = vditor.ir!.element;
 	}
 
 	// document.exeComment insertHTML 会插入 wbr
-	if (!blockElement.querySelector('wbr')) {
+	if (!blockElement?.querySelector('wbr')) {
 		const previewRenderElement = hasClosestByClassName(range.startContainer, 'vditor-ir__preview');
 		if (previewRenderElement) {
-			previewRenderElement.previousElementSibling.insertAdjacentHTML('beforeend', '<wbr>');
+			previewRenderElement.previousElementSibling?.insertAdjacentHTML('beforeend', '<wbr>');
 		} else {
 			range.insertNode(document.createElement('wbr'));
 		}
 	}
 
 	// 清除浏览器自带的样式
+	//@ts-ignore
 	blockElement.querySelectorAll('[style]').forEach((item) => {
 		item.removeAttribute('style');
 	});
 
-	if (blockElement.getAttribute('data-type') === 'link-ref-defs-block') {
+	if (blockElement?.getAttribute('data-type') === 'link-ref-defs-block') {
 		// 修改链接引用
-		blockElement = vditor.ir.element;
+		blockElement = vditor.ir!.element;
 	}
 
-	const isIRElement = blockElement.isEqualNode(vditor.ir.element);
+	const isIRElement = blockElement?.isEqualNode(vditor.ir!.element);
 	const footnoteElement = hasClosestByAttribute(blockElement, 'data-type', 'footnotes-block');
 	let html = '';
 	if (!isIRElement) {
@@ -133,10 +135,10 @@ export const input = (vditor: IEditor, range: Range, ignoreSpace = false, event?
 
 		html = blockElement.outerHTML;
 
-		if (blockElement.tagName === 'UL' || blockElement.tagName === 'OL') {
+		if (blockElement?.tagName === 'UL' || blockElement?.tagName === 'OL') {
 			// 如果为列表的话，需要把上下的列表都重绘
-			const listPrevElement = blockElement.previousElementSibling;
-			const listNextElement = blockElement.nextElementSibling;
+			const listPrevElement = blockElement?.previousElementSibling;
+			const listNextElement = blockElement?.nextElementSibling;
 			if (listPrevElement && (listPrevElement.tagName === 'UL' || listPrevElement.tagName === 'OL')) {
 				html = listPrevElement.outerHTML + html;
 				listPrevElement.remove();
@@ -148,18 +150,18 @@ export const input = (vditor: IEditor, range: Range, ignoreSpace = false, event?
 			// firefox 列表回车不会产生新的 list item https://github.com/Vanessa219/vditor/issues/194
 			html = html.replace('<div><wbr><br></div>', '<li><p><wbr><br></p></li>');
 		} else if (
-			blockElement.previousElementSibling &&
-			blockElement.previousElementSibling.textContent.replace(Constants.ZWSP, '') !== '' &&
+			blockElement?.previousElementSibling &&
+			blockElement?.previousElementSibling.textContent?.replace(Constants.ZWSP, '') !== '' &&
 			event &&
 			event.inputType === 'insertParagraph'
 		) {
 			// 换行时需要处理上一段落
-			html = blockElement.previousElementSibling.outerHTML + html;
-			blockElement.previousElementSibling.remove();
+			html = blockElement!.previousElementSibling.outerHTML + html;
+			blockElement?.previousElementSibling.remove();
 		}
-		if (!blockElement.innerText.startsWith('```')) {
+		if (!blockElement?.innerText.startsWith('```')) {
 			// 添加链接引用
-			vditor.ir.element.querySelectorAll("[data-type='link-ref-defs-block']").forEach((item) => {
+			vditor.ir?.element.querySelectorAll("[data-type='link-ref-defs-block']").forEach((item) => {
 				if (item && !(blockElement as HTMLElement).isEqualNode(item)) {
 					html += item.outerHTML;
 					item.remove();
@@ -167,6 +169,7 @@ export const input = (vditor: IEditor, range: Range, ignoreSpace = false, event?
 			});
 
 			// 添加脚注
+			//@ts-ignore
 			vditor.ir.element.querySelectorAll("[data-type='footnotes-block']").forEach((item) => {
 				if (item && !(blockElement as HTMLElement).isEqualNode(item)) {
 					html += item.outerHTML;
@@ -175,35 +178,35 @@ export const input = (vditor: IEditor, range: Range, ignoreSpace = false, event?
 			});
 		}
 	} else {
-		html = blockElement.innerHTML;
+		html = blockElement!.innerHTML;
 	}
 
-	log('SpinVditorIRDOM', html, 'argument', vditor.options.debugger);
+	log('SpinVditorIRDOM', html, 'argument', vditor.options.debugger!);
 	html = vditor.lute.SpinVditorIRDOM(html);
-	log('SpinVditorIRDOM', html, 'result', vditor.options.debugger);
+	log('SpinVditorIRDOM', html, 'result', vditor.options.debugger!);
 
 	if (isIRElement) {
-		blockElement.innerHTML = html;
+		blockElement!.innerHTML = html;
 	} else {
-		blockElement.outerHTML = html;
+		blockElement!.outerHTML = html;
 
 		// 更新正文中的 tip
 		if (footnoteElement) {
 			const footnoteItemElement = hasClosestByAttribute(
-				vditor.ir.element.querySelector('wbr'),
+				vditor.ir!.element.querySelector('wbr'),
 				'data-type',
 				'footnotes-def'
 			);
 			if (footnoteItemElement) {
 				const footnoteItemText = footnoteItemElement.textContent;
-				const marker = footnoteItemText.substring(1, footnoteItemText.indexOf(']:'));
-				const footnoteRefElement = vditor.ir.element.querySelector(
+				const marker = footnoteItemText!.substring(1, footnoteItemText?.indexOf(']:'));
+				const footnoteRefElement = vditor.ir?.element.querySelector(
 					`sup[data-type="footnotes-ref"][data-footnotes-label="${marker}"]`
 				);
 				if (footnoteRefElement) {
 					footnoteRefElement.setAttribute(
 						'aria-label',
-						footnoteItemText
+						footnoteItemText!
 							.substr(marker.length + 3)
 							.trim()
 							.substr(0, 24)
@@ -215,7 +218,8 @@ export const input = (vditor: IEditor, range: Range, ignoreSpace = false, event?
 
 	//  linkref 合并及添加
 	let firstLinkRefDefElement: HTMLElement;
-	const allLinkRefDefsElement = vditor.ir.element.querySelectorAll("[data-type='link-ref-defs-block']");
+	const allLinkRefDefsElement = vditor.ir!.element.querySelectorAll("[data-type='link-ref-defs-block']");
+	//@ts-ignore
 	allLinkRefDefsElement.forEach((item: HTMLElement, index) => {
 		if (index === 0) {
 			firstLinkRefDefElement = item;
@@ -225,12 +229,13 @@ export const input = (vditor: IEditor, range: Range, ignoreSpace = false, event?
 		}
 	});
 	if (allLinkRefDefsElement.length > 0) {
-		vditor.ir.element.insertAdjacentElement('beforeend', allLinkRefDefsElement[0]);
+		vditor.ir?.element.insertAdjacentElement('beforeend', allLinkRefDefsElement[0]);
 	}
 
 	// 脚注合并后添加的末尾
 	let firstFootnoteElement: HTMLElement;
-	const allFootnoteElement = vditor.ir.element.querySelectorAll("[data-type='footnotes-block']");
+	const allFootnoteElement = vditor.ir!.element.querySelectorAll("[data-type='footnotes-block']");
+	//@ts-ignore
 	allFootnoteElement.forEach((item: HTMLElement, index) => {
 		if (index === 0) {
 			firstFootnoteElement = item;
@@ -240,11 +245,11 @@ export const input = (vditor: IEditor, range: Range, ignoreSpace = false, event?
 		}
 	});
 	if (allFootnoteElement.length > 0) {
-		vditor.ir.element.insertAdjacentElement('beforeend', allFootnoteElement[0]);
+		vditor.ir?.element.insertAdjacentElement('beforeend', allFootnoteElement[0]);
 	}
 
-	setRangeByWbr(vditor.ir.element, range);
-
+	setRangeByWbr(vditor.ir!.element, range);
+	//@ts-ignore
 	vditor.ir.element.querySelectorAll(".vditor-ir__preview[data-render='2']").forEach((item: HTMLElement) => {
 		processCodeRender(item, vditor);
 	});

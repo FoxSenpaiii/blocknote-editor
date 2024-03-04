@@ -3,6 +3,7 @@ import { addScript, addScriptSync } from '$util/addScript';
 import { addStyle } from '$util/addStyle';
 import { code160to32 } from '$util/code160to32';
 import { mathRenderAdapter } from './adapterRender';
+import { IMath } from '$type/math';
 
 declare const katex: {
 	renderToString(
@@ -42,44 +43,44 @@ export const mathRender = (element: HTMLElement, options?: { cdn?: string; math?
 	}
 	options = Object.assign({}, defaultOptions, options);
 
-	if (options.math.engine === 'KaTeX') {
+	if (options.math?.engine === 'KaTeX') {
 		addStyle(`${options.cdn}/dist/js/katex/katex.min.css?v=0.16.9`, 'vditorKatexStyle');
 		addScript(`${options.cdn}/dist/js/katex/katex.min.js?v=0.16.9`, 'vditorKatexScript').then(() => {
-			addScript(`${options.cdn}/dist/js/katex/mhchem.min.js?v=0.16.9`, 'vditorKatexChemScript').then(() => {
+			addScript(`${options?.cdn}/dist/js/katex/mhchem.min.js?v=0.16.9`, 'vditorKatexChemScript').then(() => {
 				mathElements.forEach((mathElement) => {
 					if (
-						mathElement.parentElement.classList.contains('vditor-wysiwyg__pre') ||
-						mathElement.parentElement.classList.contains('vditor-ir__marker--pre')
+						mathElement.parentElement?.classList.contains('vditor-wysiwyg__pre') ||
+						mathElement.parentElement?.classList.contains('vditor-ir__marker--pre')
 					) {
 						return;
 					}
 					if (mathElement.getAttribute('data-math')) {
 						return;
 					}
-					const math = code160to32(mathRenderAdapter.getCode(mathElement));
+					const math = code160to32(mathRenderAdapter.getCode(mathElement)!);
 					mathElement.setAttribute('data-math', math);
 					try {
 						mathElement.innerHTML = katex.renderToString(math, {
 							displayMode: mathElement.tagName === 'DIV',
 							output: 'html',
-							macros: options.math.macros
+							macros: options?.math?.macros!
 						});
 					} catch (e) {
 						mathElement.innerHTML = e.message;
 						mathElement.className = 'language-math vditor-reset--error';
 					}
-
+					//@ts-ignore
 					mathElement.addEventListener('copy', (event: ClipboardEvent) => {
 						event.stopPropagation();
 						event.preventDefault();
 						const vditorMathElement = (event.currentTarget as HTMLElement).closest('.language-math');
-						event.clipboardData.setData('text/html', vditorMathElement.innerHTML);
-						event.clipboardData.setData('text/plain', vditorMathElement.getAttribute('data-math'));
+						event.clipboardData?.setData('text/html', vditorMathElement!.innerHTML);
+						event.clipboardData?.setData('text/plain', vditorMathElement?.getAttribute('data-math')!);
 					});
 				});
 			});
 		});
-	} else if (options.math.engine === 'MathJax') {
+	} else if (options.math?.engine === 'MathJax') {
 		const chainAsync = (fns: any) => {
 			if (fns.length === 0) {
 				return;
@@ -101,16 +102,16 @@ export const mathRender = (element: HTMLElement, options?: { cdn?: string; math?
 					typeset: false
 				},
 				tex: {
-					macros: options.math.macros
+					macros: options.math?.macros
 				}
 			};
 			// https://github.com/Vanessa219/vditor/issues/1453
-			Object.assign(window.MathJax, options.math.mathJaxOptions);
+			Object.assign(window.MathJax, options.math?.mathJaxOptions);
 		}
 		// 循环加载会抛异常
 		addScriptSync(`${options.cdn}/dist/js/mathjax/tex-svg-full.js`, 'protyleMathJaxScript');
 		const renderMath = (mathElement: Element, next?: () => void) => {
-			const math = code160to32(mathElement.textContent).trim();
+			const math = code160to32(mathElement.textContent!).trim();
 			const mathOptions = window.MathJax.getMetricsFor(mathElement);
 			mathOptions.display = mathElement.tagName === 'DIV';
 			window.MathJax.tex2svgPromise(math, mathOptions).then((node: Element) => {
@@ -120,8 +121,8 @@ export const mathRender = (element: HTMLElement, options?: { cdn?: string; math?
 				window.MathJax.startup.document.clear();
 				window.MathJax.startup.document.updateDocument();
 				const errorTextElement = node.querySelector('[data-mml-node="merror"]');
-				if (errorTextElement && errorTextElement.textContent.trim() !== '') {
-					mathElement.innerHTML = errorTextElement.textContent.trim();
+				if (errorTextElement && errorTextElement.textContent?.trim() !== '') {
+					mathElement.innerHTML = errorTextElement.textContent!.trim();
 					mathElement.className = 'vditor-reset--error';
 				}
 				if (next) {
@@ -134,10 +135,10 @@ export const mathRender = (element: HTMLElement, options?: { cdn?: string; math?
 			for (let i = 0; i < mathElements.length; i++) {
 				const mathElement = mathElements[i];
 				if (
-					!mathElement.parentElement.classList.contains('vditor-wysiwyg__pre') &&
-					!mathElement.parentElement.classList.contains('vditor-ir__marker--pre') &&
+					!mathElement.parentElement?.classList.contains('vditor-wysiwyg__pre') &&
+					!mathElement.parentElement?.classList.contains('vditor-ir__marker--pre') &&
 					!mathElement.getAttribute('data-math') &&
-					code160to32(mathElement.textContent).trim()
+					code160to32(mathElement.textContent!).trim()
 				) {
 					chains.push((next: () => void) => {
 						if (i === mathElements.length - 1) {

@@ -18,6 +18,8 @@ import { markmapRender } from '$comp/markdown/markmapRender';
 import { mindmapRender } from './mindmapRender';
 import { plantumlRender } from './plantumlRender';
 import { setLute } from './setLute';
+import { IPreviewOptions } from '$type/preview';
+
 
 const mergeOptions = (options?: IPreviewOptions) => {
 	const defaultOption: IPreviewOptions = {
@@ -36,12 +38,12 @@ const mergeOptions = (options?: IPreviewOptions) => {
 		},
 		theme: Constants.THEME_OPTIONS
 	};
-	if (options.cdn) {
-		if (!options.theme?.path) {
-			defaultOption.theme.path = `${options.cdn}/dist/css/content-theme`;
+	if (options?.cdn) {
+		if (!options?.theme?.path) {
+			defaultOption.theme!.path = `${options?.cdn}/dist/css/content-theme`;
 		}
-		if (!options.emojiPath) {
-			defaultOption.emojiPath = `${options.cdn}/dist/images/emoji`;
+		if (!options?.emojiPath) {
+			defaultOption.emojiPath = `${options?.cdn}/dist/images/emoji`;
 		}
 	}
 	return merge(defaultOption, options);
@@ -81,7 +83,7 @@ export const md2html = (mdText: string, options?: IPreviewOptions) => {
 		return lute.Md2HTML(mdText);
 	});
 };
-
+//@ts-ignore
 export const previewRender = async (previewElement: HTMLDivElement, markdown: string, options?: IPreviewOptions) => {
 	const mergedOptions: IPreviewOptions = mergeOptions(options);
 	let html = await md2html(markdown, mergedOptions);
@@ -94,7 +96,7 @@ export const previewRender = async (previewElement: HTMLDivElement, markdown: st
 	if (!mergedOptions.i18n) {
 		if (
 			!['en_US', 'fr_FR', 'pt_BR', 'ja_JP', 'ko_KR', 'ru_RU', 'sv_SE', 'zh_CN', 'zh_TW'].includes(
-				mergedOptions.lang
+				mergedOptions.lang?
 			)
 		) {
 			throw new Error('options.lang error, see https://ld246.com/article/1549638745630#options');
@@ -116,7 +118,7 @@ export const previewRender = async (previewElement: HTMLDivElement, markdown: st
 		await addScript(`${mergedOptions.cdn}/dist/js/icons/${mergedOptions.icon}.js`, 'vditorIconScript');
 	}
 
-	setContentTheme(mergedOptions.theme.current, mergedOptions.theme.path);
+	setContentTheme(mergedOptions.theme!.current, mergedOptions.theme?.path!);
 	if (mergedOptions.anchor === 1) {
 		previewElement.classList.add('vditor-reset--anchor');
 	}
@@ -135,11 +137,11 @@ export const previewRender = async (previewElement: HTMLDivElement, markdown: st
 	plantumlRender(previewElement, mergedOptions.cdn);
 	abcRender(previewElement, mergedOptions.cdn);
 	mediaRender(previewElement);
-	if (mergedOptions.speech.enable) {
+	if (mergedOptions.speech?.enable) {
 		speechRender(previewElement);
 	}
 	if (mergedOptions.anchor !== 0) {
-		anchorRender(mergedOptions.anchor);
+		anchorRender(mergedOptions.anchor!);
 	}
 	if (mergedOptions.after) {
 		mergedOptions.after();
@@ -147,6 +149,7 @@ export const previewRender = async (previewElement: HTMLDivElement, markdown: st
 	if (mergedOptions.lazyLoadImage) {
 		lazyLoadImageRender(previewElement);
 	}
+	//@ts-ignore
 	previewElement.addEventListener('click', (event: MouseEvent & { target: HTMLElement }) => {
 		const spanElement = hasClosestByMatchTag(event.target, 'SPAN');
 		if (spanElement && hasClosestByClassName(spanElement, 'vditor-toc')) {
