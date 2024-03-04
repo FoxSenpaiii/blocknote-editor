@@ -1,0 +1,234 @@
+@color_1: rgba(0, 0, 0, 0.85);
+@color_2: rgba(0, 0, 0, 0.65);
+@color_3: #5c6b77;
+@color_4: rgba(0, 0, 0, 0.45);
+@color_5: #1890ff;
+@font_family_1: Avenir, -apple-system, BlinkMacSystemFont, segoe ui, Roboto, helvetica neue, Arial, noto sans,
+	sans-serif, apple color emoji, segoe ui emoji, segoe ui symbol, noto color emoji, sans-serif;
+@font_family_2: sfmono-regular, Consolas, liberation mono, Menlo, Courier, monospace;
+
+.vditor-reset {
+	color: @color_1;
+	font-size: 14px;
+	line-height: 2;
+	img {
+		max-width: calc(100% - 32px);
+	}
+	p {
+		> img {
+			margin: 34px 0;
+			box-shadow: 0 8px 20px rgba(143, 168, 191, 0.35);
+		}
+		margin: 1em 0;
+	}
+	h1 {
+		margin-bottom: 20px;
+		color: @color_1;
+		font-weight: 500;
+		font-size: 30px;
+		font-family: @font_family_1;
+		line-height: 38px;
+		&:hover {
+			.vditor-anchor {
+				display: inline-block;
+				opacity: 1;
+			}
+		}
+	}
+	h2 {
+		font-size: 24px;
+		line-height: 32px;
+		clear: both;
+		margin: 1.6em 0 0.6em;
+		color: @color_1;
+		font-weight: 500;
+		font-family: @font_family_1;
+		&:hover {
+			.vditor-anchor {
+				display: inline-block;
+				opacity: 1;
+			}
+		}
+	}
+	h3 {
+		clear: both;
+		margin: 1.6em 0 0.6em;
+		color: @color_1;
+		font-weight: 500;
+		font-family: @font_family_1;
+		font-size: 18px;
+		&:hover {
+			.vditor-anchor {
+				display: inline-block;
+				opacity: 1;
+			}
+		}
+	}
+	h4 {
+		clear: both;
+		margin: 1.6em 0 0.6em;
+		color: @color_1;
+		font-weight: 500;
+		font-family: @font_family_1;
+		font-size: 16px;
+		&:hover {
+			.vditor-anchor {
+				display: inline-block;
+				opacity: 1;
+			}
+		}
+	}
+	h5 {
+		clear: both;
+		margin: 1.6em 0 0.6em;
+		color: @color_1;
+		font-weight: 500;
+		font-family: @font_family_1;
+		font-size: 14px;
+		&:hover {
+			.vditor-anchor {
+				display: inline-block;
+				opacity: 1;
+			}
+		}
+	}
+	h6 {
+		clear: both;
+		margin: 1.6em 0 0.6em;
+		color: @color_1;
+		font-weight: 500;
+		font-family: @font_family_1;
+		font-size: 12px;
+		&:hover {
+			.vditor-anchor {
+				display: inline-block;
+				opacity: 1;
+			}
+		}
+	}
+	hr {
+		clear: both;
+		height: 1px;
+		margin: 56px 0;
+		background: #f0f0f0;
+		border: 0;
+	}
+	pre {
+		margin: 1em 0;
+		font-family: @font_family_2;
+		border-radius: 2px;
+	}
+	ul {
+		> li {
+			margin-left: 20px;
+			padding-left: 4px;
+			list-style-type: circle;
+			> p {
+				margin: 0.2em 0;
+			}
+		}
+	}
+	ol {
+		> li {
+			margin-left: 20px;
+			padding-left: 4px;
+			list-style-type: decimal;
+			> p {
+				margin: 0.2em 0;
+			}
+		}
+	}
+	code {
+		margin: 0 1px;
+		padding: 0.2em 0.4em;
+		font-size: 0.9em;
+		border-radius: 3px;
+		border: 1px solid #f0f0f0;
+		font-family: @font_family_2;
+		&:not(.hljs) {
+			&:not(.highlight-chroma) {
+				background: #f2f4f5;
+				color: @color_2;
+			}
+		}
+	}
+	.language-abc {
+		svg {
+			fill: currentColor;
+			color: @color_1;
+		}
+		path {
+			fill: currentColor;
+			color: @color_1;
+		}
+	}
+	.language-graphviz {
+		polygon {
+			fill: transparent;
+		}
+	}
+	strong {
+		font-weight: 500;
+	}
+	b {
+		font-weight: 500;
+	}
+	> table {
+		width: 100%;
+		margin: 8px 0 16px;
+		direction: ltr;
+		empty-cells: show;
+		border: 1px solid #f0f0f0;
+		border-collapse: collapse;
+		border-spacing: 0;
+		th {
+			color: @color_3;
+			font-weight: 500;
+			white-space: nowrap;
+			background: rgba(0, 0, 0, 0.02);
+			padding: 16px 24px;
+			text-align: left;
+			border: 1px solid #f0f0f0;
+		}
+		td {
+			padding: 16px 24px;
+			text-align: left;
+			border: 1px solid #f0f0f0;
+		}
+	}
+	blockquote {
+		margin: 1em 0;
+		padding-left: 0.8em;
+		color: @color_4;
+		font-size: 90%;
+		border-left: 4px solid #f0f0f0;
+		p {
+			margin: 0;
+		}
+	}
+	.vditor-anchor {
+		margin-left: 8px;
+		opacity: 0;
+		transition: opacity 0.3s;
+	}
+	> br {
+		clear: both;
+	}
+	> p {
+		> br {
+			clear: both;
+		}
+	}
+	a {
+		color: @color_5;
+		text-decoration: none;
+		outline: none;
+		cursor: pointer;
+	}
+}
+.vditor-ir__link {
+	color: @color_5;
+	text-decoration: none;
+	outline: none;
+	cursor: pointer;
+}
